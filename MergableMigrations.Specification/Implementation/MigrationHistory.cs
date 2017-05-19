@@ -9,5 +9,10 @@ namespace MergableMigrations.Specification.Implementation
         }
 
         public static MigrationHistory Empty { get; } = new MigrationHistory();
+
+        public MigrationHistory Subtract(MigrationHistory migrationHistory)
+        {
+            return migrationHistory;
+        }
     }
 }
