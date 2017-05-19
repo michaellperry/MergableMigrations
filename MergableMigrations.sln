@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mathematicians", "Mathematicians\Mathematicians.csproj", "{67E4C5B2-CEDF-4E72-A3B8-AAE3EC39C356}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergableMigrations.EF6", "MergableMigrations.EF6\MergableMigrations.EF6.csproj", "{6F10EF50-1323-474B-8D8D-EB48F03E3A9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergableMigrations.DDD", "MergableMigrations.DDD\MergableMigrations.DDD.csproj", "{FE9C23F8-B414-46AB-9EA2-8E8308157C93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mathematicians.UnitTests", "Mathematicians.UnitTests\Mathematicians.UnitTests.csproj", "{B54F935E-38D9-4E16-8CCE-0183A4934FD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{FE9C23F8-B414-46AB-9EA2-8E8308157C93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE9C23F8-B414-46AB-9EA2-8E8308157C93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE9C23F8-B414-46AB-9EA2-8E8308157C93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B54F935E-38D9-4E16-8CCE-0183A4934FD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B54F935E-38D9-4E16-8CCE-0183A4934FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B54F935E-38D9-4E16-8CCE-0183A4934FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B54F935E-38D9-4E16-8CCE-0183A4934FD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

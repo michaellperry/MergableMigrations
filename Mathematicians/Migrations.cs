@@ -3,7 +3,7 @@ using MergableMigrations.Specification;
 
 namespace Mathematicians
 {
-    public class Migrations
+    public class Migrations : IMigrations
     {
         public void AddMigrations(ModelSpecification model)
         {
