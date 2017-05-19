@@ -6,15 +6,18 @@ namespace MergableMigrations.Specification.Implementation
     public class MigrationHistory
     {
         private readonly ImmutableList<Migration> _migrations;
+        private readonly ImmutableHashSet<Migration> _migrationSet;
 
         public MigrationHistory()
         {
             _migrations = ImmutableList<Migration>.Empty;
+            _migrationSet = ImmutableHashSet<Migration>.Empty;
         }
 
-        private MigrationHistory(ImmutableList<Migration> migrations)
+        private MigrationHistory(ImmutableList<Migration> migrations, ImmutableHashSet<Migration> migrationSet)
         {
             _migrations = migrations;
+            _migrationSet = migrationSet;
         }
 
         public bool Any => _migrations.Any();
@@ -22,13 +25,17 @@ namespace MergableMigrations.Specification.Implementation
 
         public MigrationHistory Add(Migration migration)
         {
-            return new MigrationHistory(_migrations.Add(migration));
+            return new MigrationHistory(
+                _migrations.Add(migration),
+                _migrationSet.Add(migration));
         }
 
         public MigrationHistory Subtract(MigrationHistory migrationHistory)
         {
-            return new MigrationHistory(_migrations.RemoveAll(x =>
-                migrationHistory._migrations.Contains(x)));
+            return new MigrationHistory(
+                _migrations.RemoveAll(x =>
+                    migrationHistory._migrationSet.Contains(x)),
+                _migrationSet.Except(migrationHistory._migrations));
         }
     }
 }

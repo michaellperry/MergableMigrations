@@ -21,5 +21,32 @@ namespace MergableMigrations.Specification.Implementation
 
             return sql;
         }
+
+        public bool Equals(CreateDatabaseMigration other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Equals(_name, other._name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is CreateDatabaseMigration)
+                return Equals((CreateDatabaseMigration)obj);
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = 47;
+                if (_name != null)
+                    hashCode = (hashCode * 53) ^ _name.GetHashCode();
+                return hashCode;
+            }
+        }
     }
 }
