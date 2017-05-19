@@ -1,23 +1,30 @@
 ﻿using MergableMigrations.Specification;
+using MergableMigrations.Specification.Implementation;
 
 namespace MergableMigrations.EF6
 {
     public class SqlGenerator
     {
         private readonly IMigrations _migrations;
+        private readonly MigrationHistory _migrationHistory;
 
-        public SqlGenerator(IMigrations migrations)
+        public SqlGenerator(IMigrations migrations, MigrationHistory migrationHistory)
         {
             _migrations = migrations;
-            Generate();
+            _migrationHistory = migrationHistory;
         }
 
-        public string Generate()
+        public string[] Generate()
         {
             var model = new ModelSpecification();
             _migrations.AddMigrations(model);
 
-            return "";
+            string[] sql =
+            {
+                ""
+            };
+
+            return sql;
         }
     }
 }
