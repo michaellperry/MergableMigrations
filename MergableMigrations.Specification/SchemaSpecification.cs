@@ -9,7 +9,7 @@ namespace MergableMigrations.Specification
         private readonly string _schemaName;
         private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
 
-        public SchemaSpecification(string databaseName, string schemaName, MigrationHistoryBuilder migrationHistoryBuilder)
+        internal SchemaSpecification(string databaseName, string schemaName, MigrationHistoryBuilder migrationHistoryBuilder)
         {
             _databaseName = databaseName;
             _schemaName = schemaName;
@@ -18,8 +18,9 @@ namespace MergableMigrations.Specification
 
         public TableSpecification CreateTable(string tableName)
         {
-            _migrationHistoryBuilder.Append(new CreateTableMigration(_databaseName, _schemaName, tableName));
-            return new TableSpecification(_databaseName, _schemaName, tableName, _migrationHistoryBuilder);
+            var migration = new CreateTableMigration(_databaseName, _schemaName, tableName);
+            _migrationHistoryBuilder.Append(migration);
+            return new TableSpecification(_databaseName, _schemaName, tableName, _migrationHistoryBuilder, migration);
         }
     }
 }

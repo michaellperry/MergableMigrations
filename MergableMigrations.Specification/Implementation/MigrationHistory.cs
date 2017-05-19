@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -24,6 +26,13 @@ namespace MergableMigrations.Specification.Implementation
             return new MigrationHistory(
                 _migrations.Add(migration),
                 _migrationSet.Add(migration));
+        }
+
+        public MigrationHistory AddAll(IEnumerable<Migration> migrations)
+        {
+            return new MigrationHistory(
+                _migrations.AddRange(migrations),
+                _migrationSet.Union(migrations));
         }
 
         public MigrationDelta Subtract(MigrationHistory migrationHistory)

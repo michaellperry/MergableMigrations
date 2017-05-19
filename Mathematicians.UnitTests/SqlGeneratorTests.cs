@@ -2,8 +2,6 @@
 using MergableMigrations.EF6;
 using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
-using System;
-using System.Linq;
 using Xunit;
 
 namespace Mathematicians.UnitTests
@@ -20,8 +18,13 @@ namespace Mathematicians.UnitTests
 
             sql.Length.Should().Be(3);
             sql[0].Should().Be("CREATE DATABASE [Mathematicians]");
-            sql[1].Should().Be("CREATE TABLE [Mathematicians].[dbo].[Mathematician]");
-            sql[2].Should().Be("CREATE TABLE [Mathematicians].[dbo].[Contribution]");
+            sql[1].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
+    [MathematicianId] INT NOT NULL,
+    [BirthYear] INT NOT NULL,
+    [DeathYear] INT NULL)");
+            sql[2].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
+    [ContributionId] INT NOT NULL,
+    [MathematicianId] INT NOT NULL)");
         }
 
         [Fact]
