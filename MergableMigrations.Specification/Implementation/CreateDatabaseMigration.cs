@@ -12,16 +12,14 @@ namespace MergableMigrations.Specification.Implementation
             _name = name;
         }
 
-        public override GenerationResult GenerateSql()
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
             string[] sql =
             {
                 $"CREATE DATABASE [{_name}]"
             };
 
-            var migrations = new MigrationHistory();
-            migrations.Append(this);
-            return new GenerationResult(sql.ToImmutableList(), migrations);
+            return sql;
         }
     }
 }

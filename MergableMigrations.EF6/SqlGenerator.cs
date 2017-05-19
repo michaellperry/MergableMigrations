@@ -27,9 +27,11 @@ namespace MergableMigrations.EF6
 
             while (difference.Any)
             {
-                var result = difference.Head.GenerateSql();
-                sql = sql.AddRange(result.Sql);
-                difference = difference.Subtract(result.Migrations);
+                var migrationsAffected = new MigrationHistoryBuilder();
+                migrationsAffected.Append(difference.Head);
+                string[] result = difference.Head.GenerateSql(migrationsAffected);
+                sql = sql.AddRange(result);
+                difference = difference.Subtract(migrationsAffected.MigrationHistory);
             }
 
             return sql.ToArray();

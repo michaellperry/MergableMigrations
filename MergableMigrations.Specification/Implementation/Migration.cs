@@ -4,6 +4,6 @@ namespace MergableMigrations.Specification.Implementation
 {
     public abstract class Migration
     {
-        public abstract GenerationResult GenerateSql();
+        public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected);
     }
 }
