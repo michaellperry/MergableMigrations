@@ -6,7 +6,7 @@ namespace MergableMigrations.Specification
     {
         public SchemaSpecification UseSchema(string str)
         {
-            throw new NotImplementedException();
+            return new SchemaSpecification();
         }
     }
 }

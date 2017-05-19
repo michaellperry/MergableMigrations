@@ -6,7 +6,7 @@ namespace MergableMigrations.Specification
     {
         public TableSpecification CreateTable(string name)
         {
-            throw new NotImplementedException();
+            return new TableSpecification();
         }
     }
 }

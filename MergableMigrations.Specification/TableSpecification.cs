@@ -6,17 +6,17 @@ namespace MergableMigrations.Specification
     {
         public ColumnSpecification CreateIntColumn(string name, bool nullable = false)
         {
-            throw new NotImplementedException();
+            return new ColumnSpecification();
         }
 
         public ColumnSpecification CreateStringColumn(string name, int length, bool nullable = false)
         {
-            throw new NotImplementedException();
+            return new ColumnSpecification();
         }
 
         public PrimaryKeySpecification CreatePrimaryKey(params ColumnSpecification[] columns)
         {
-            throw new NotImplementedException();
+            return new PrimaryKeySpecification();
         }
 
         public UniqueIndexSpecification CreateUniqueIndex(params ColumnSpecification[] columns)
@@ -26,7 +26,7 @@ namespace MergableMigrations.Specification
 
         public IndexSpecification CreateIndex(params ColumnSpecification[] columns)
         {
-            throw new NotImplementedException();
+            return new IndexSpecification();
         }
     }
 }

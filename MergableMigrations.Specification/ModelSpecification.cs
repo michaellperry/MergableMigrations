@@ -6,7 +6,7 @@ namespace MergableMigrations.Specification
     {
         public DatabaseSpecification CreateDatabase(string name)
         {
-            throw new NotImplementedException();
+            return new DatabaseSpecification();
         }
     }
 }

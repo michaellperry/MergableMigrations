@@ -6,7 +6,7 @@ namespace MergableMigrations.Specification
     {
         public ForeignKeySpecification CreateForeignKey(PrimaryKeySpecification referencing, bool cascadeDelete = false, bool cascadeUpdate = false)
         {
-            throw new NotImplementedException();
+            return new ForeignKeySpecification();
         }
     }
 }
