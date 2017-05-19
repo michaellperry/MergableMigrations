@@ -1,5 +1,4 @@
-﻿using System;
-using MergableMigrations.Specification.Implementation;
+﻿using MergableMigrations.Specification.Implementation;
 
 namespace MergableMigrations.Specification
 {
@@ -14,7 +13,7 @@ namespace MergableMigrations.Specification
         public DatabaseSpecification CreateDatabase(string name)
         {
             _migrationHistoryBuilder.Append(new CreateDatabaseMigration(name));
-            return new DatabaseSpecification();
+            return new DatabaseSpecification(name, _migrationHistoryBuilder);
         }
     }
 }

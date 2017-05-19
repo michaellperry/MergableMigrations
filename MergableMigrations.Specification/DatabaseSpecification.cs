@@ -1,12 +1,22 @@
 ﻿using System;
+using MergableMigrations.Specification.Implementation;
 
 namespace MergableMigrations.Specification
 {
     public class DatabaseSpecification
     {
-        public SchemaSpecification UseSchema(string str)
+        private readonly string _databaseName;
+        private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
+
+        public DatabaseSpecification(string databaseName, MigrationHistoryBuilder migrationHistoryBuilder)
         {
-            return new SchemaSpecification();
+            _databaseName = databaseName;
+            _migrationHistoryBuilder = migrationHistoryBuilder;
+        }
+
+        public SchemaSpecification UseSchema(string schemaName)
+        {
+            return new SchemaSpecification(_databaseName, schemaName, _migrationHistoryBuilder);
         }
     }
 }

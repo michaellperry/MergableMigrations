@@ -17,8 +17,10 @@ namespace Mathematicians.UnitTests
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
             var sql = sqlGenerator.Generate();
 
-            sql.Length.Should().Be(1);
+            sql.Length.Should().Be(3);
             sql[0].Should().Be("CREATE DATABASE [Mathematicians]");
+            sql[1].Should().Be("CREATE TABLE [Mathematicians].[dbo].[Mathematician]");
+            sql[2].Should().Be("CREATE TABLE [Mathematicians].[dbo].[Contribution]");
         }
     }
 }
