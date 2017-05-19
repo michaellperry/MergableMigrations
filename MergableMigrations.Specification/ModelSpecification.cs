@@ -5,10 +5,11 @@ namespace MergableMigrations.Specification
 {
     public class ModelSpecification
     {
-        public MigrationHistory Migrations { get; } = MigrationHistory.Empty;
+        public MigrationHistory MigrationHistory { get; } = new MigrationHistory();
 
         public DatabaseSpecification CreateDatabase(string name)
         {
+            MigrationHistory.Append(new CreateDatabaseMigration(name));
             return new DatabaseSpecification();
         }
     }

@@ -1,5 +1,7 @@
 ﻿using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace MergableMigrations.EF6
 {
@@ -18,15 +20,19 @@ namespace MergableMigrations.EF6
         {
             var model = new ModelSpecification();
             _migrations.AddMigrations(model);
-            var migrations = model.Migrations;
-            var difference = migrations.Subtract(_migrationHistory);
+            var newMigrations = model.MigrationHistory;
+            var difference = newMigrations.Subtract(_migrationHistory);
 
-            string[] sql =
+            var sql = ImmutableList<string>.Empty;
+
+            while (difference.Any)
             {
-                ""
-            };
+                var result = difference.Head.GenerateSql();
+                sql = sql.AddRange(result.Sql);
+                difference = difference.Subtract(result.Migrations);
+            }
 
-            return sql;
+            return sql.ToArray();
         }
     }
 }
