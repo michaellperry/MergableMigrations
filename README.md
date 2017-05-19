@@ -6,6 +6,59 @@ Current status: **ideation**
 
 You can't yet use this in production.
 
+## What do migrations look like?
+
+Create a database and schema (or use `dbo`):
+
+```csharp
+public void AddMigrations(ModelSpecification model)
+{
+    var db = model.CreateDatabase("Mathematicians");
+
+    var dbo = db.UseSchema("dbo");
+}
+```
+
+Create a table:
+
+```csharp
+var table = dbo.CreateTable("Mathematician");
+
+var mathematicianId = table.CreateIntColumn("MathematicianId");
+var pk = table.CreatePrimaryKey(mathematicianId);
+var name = table.CreateStringColumn("Name", 100);
+var birthYear = table.CreateIntColumn("BirthYear");
+var deathYear = table.CreateIntColumn("DeathYear", nullable: true);
+```
+
+Create a foreign key:
+
+```csharp
+var contribution = dbo.CreateTable("Contribution");
+
+var contributionMathematicianId = contribution.CreateIntColumn("MathematicianId");
+
+var indexMathematicianId = contribution.CreateIndex(contributionMathematicianId);
+var fkMathematician = indexMathematicianId.CreateForeignKey(pk);
+```
+
+Organize these migration steps to keep them nice and neat. Put them in functions. Group them in classes. The organization is up to you. They don't need to be put in sequential order.
+
+If you make a mistake, do not delete a migration step! Instead, create a new migration. Rename a table or column:
+
+```csharp
+var paper = contribution.RenameTable("Paper");
+var yearOfBirth = birthYear.RenameColumn("YearOfBirth");
+```
+
+Or drop a table or column:
+
+```csharp
+deathDate.DropColumn();
+```
+
+As long as you always add migrations, database deployment will be successful. To any environment. But if you delete one, then the tool will halt.
+
 ## Why partially ordered?
 
 The reason that database migrations are so finicky is that they have to be applied in a specific order. This makes it difficult for members of a development team to work on different migrations at the same time. Usually, they have to resolve collisions by backing out and reapplying their changes. This ensures that changes can be serialized: applied in a specific linear order.

@@ -18,8 +18,8 @@ namespace MergableMigrations.EF6
         {
             var model = new ModelSpecification();
             _migrations.AddMigrations(model);
-            MigrationHistory migrations = model.Migrations;
-            MigrationHistory difference = migrations.Subtract(_migrationHistory);
+            var migrations = model.Migrations;
+            var difference = migrations.Subtract(_migrationHistory);
 
             string[] sql =
             {
