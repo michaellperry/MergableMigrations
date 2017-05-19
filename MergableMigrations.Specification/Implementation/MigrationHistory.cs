@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -20,9 +19,6 @@ namespace MergableMigrations.Specification.Implementation
             _migrationSet = migrationSet;
         }
 
-        public bool Any => _migrations.Any();
-        public Migration Head => _migrations.First();
-
         public MigrationHistory Add(Migration migration)
         {
             return new MigrationHistory(
@@ -30,12 +26,15 @@ namespace MergableMigrations.Specification.Implementation
                 _migrationSet.Add(migration));
         }
 
-        public MigrationHistory Subtract(MigrationHistory migrationHistory)
+        public MigrationDelta Subtract(MigrationHistory migrationHistory)
         {
-            return new MigrationHistory(
-                _migrations.RemoveAll(x =>
-                    migrationHistory._migrationSet.Contains(x)),
-                _migrationSet.Except(migrationHistory._migrations));
+            return new MigrationDelta(_migrations.RemoveAll(x =>
+                migrationHistory.Contains(x)));
+        }
+
+        public bool Contains(Migration migration)
+        {
+            return _migrationSet.Contains(migration);
         }
     }
 }
