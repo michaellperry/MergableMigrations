@@ -1,15 +1,15 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FluentAssertions;
 using MergableMigrations.EF6;
-using FluentAssertions;
+using System;
+using System.Linq;
+using Xunit;
 
 namespace Mathematicians.UnitTests
 {
-    [TestClass]
-    public class SqlGenerationTests
+    public class SqlGeneratorTests
     {
-        [TestMethod]
-        public void GeneratesSql()
+        [Fact]
+        public void CanGenerateSql()
         {
             var migrations = new Migrations();
             var sqlGenerator = new SqlGenerator(migrations);
