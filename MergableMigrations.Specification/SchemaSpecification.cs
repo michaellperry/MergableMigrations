@@ -17,7 +17,7 @@ namespace MergableMigrations.Specification
         public TableSpecification CreateTable(string tableName)
         {
             var migration = new CreateTableMigration(
-                _migration.DatabaseName, _migration.SchemaName, tableName);
+                _migration, tableName);
             _migrationHistoryBuilder.Append(migration);
             return new TableSpecification(migration, _migrationHistoryBuilder);
         }

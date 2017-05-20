@@ -41,9 +41,9 @@
         {
             unchecked
             {
-                var hashCode = 47;
+                var hashCode = nameof(CreateDatabaseMigration).Sha356Hash();
                 if (_name != null)
-                    hashCode = (hashCode * 53) ^ _name.GetHashCode();
+                    hashCode = (hashCode * 53) ^ _name.Sha356Hash();
                 return hashCode;
             }
         }

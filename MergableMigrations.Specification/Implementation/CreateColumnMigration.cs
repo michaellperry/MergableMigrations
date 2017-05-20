@@ -53,13 +53,13 @@ namespace MergableMigrations.Specification
         {
             unchecked
             {
-                var hashCode = 47;
-                if (_columnName != null)
-                    hashCode = (hashCode * 53) ^ _columnName.GetHashCode();
-                if (_typeDescriptor != null)
-                    hashCode = (hashCode * 53) ^ _typeDescriptor.GetHashCode();
-                if (_migrationHistoryBuilder != null)
+                var hashCode = nameof(CreateColumnMigration).Sha356Hash();
+                if (_parent != null)
                     hashCode = (hashCode * 53) ^ _parent.GetHashCode();
+                if (_columnName != null)
+                    hashCode = (hashCode * 53) ^ _columnName.Sha356Hash();
+                if (_typeDescriptor != null)
+                    hashCode = (hashCode * 53) ^ _typeDescriptor.Sha356Hash();
                 return hashCode;
             }
         }

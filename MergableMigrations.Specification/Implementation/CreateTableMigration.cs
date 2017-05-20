@@ -5,21 +5,19 @@ namespace MergableMigrations.Specification.Implementation
 {
     class CreateTableMigration : Migration
     {
-        private readonly string _databaseName;
-        private readonly string _schemaName;
+        private readonly UseSchemaMigration _parent;
         private readonly string _tableName;
 
         private ImmutableList<CreateColumnMigration> _columns =
             ImmutableList<CreateColumnMigration>.Empty;
 
-        public string DatabaseName => _databaseName;
-        public string SchemaName => _schemaName;
+        public string DatabaseName => _parent.DatabaseName;
+        public string SchemaName => _parent.SchemaName;
         public string TableName => _tableName;
 
-        public CreateTableMigration(string databaseName, string schemaName, string tableName)
+        public CreateTableMigration(UseSchemaMigration parent, string tableName)
         {
-            _databaseName = databaseName;
-            _schemaName = schemaName;
+            _parent = parent;
             _tableName = tableName;
         }
 
@@ -31,7 +29,7 @@ namespace MergableMigrations.Specification.Implementation
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
             string createTable;
-            string head = $"CREATE TABLE [{_databaseName}].[{_schemaName}].[{_tableName}]";
+            string head = $"CREATE TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]";
             if (_columns.Any())
             {
                 createTable = $"{head}({string.Join(",", _columns.Select(GenerateColumnSql))})";
@@ -61,7 +59,7 @@ namespace MergableMigrations.Specification.Implementation
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return Equals(_databaseName, other._databaseName) && Equals(_schemaName, other._schemaName) && Equals(_tableName, other._tableName);
+            return Equals(_tableName, other._tableName) && Equals(_parent, other._parent);
         }
 
         public override bool Equals(object obj)
@@ -75,13 +73,11 @@ namespace MergableMigrations.Specification.Implementation
         {
             unchecked
             {
-                var hashCode = 47;
-                if (_databaseName != null)
-                    hashCode = (hashCode * 53) ^ _databaseName.GetHashCode();
-                if (_schemaName != null)
-                    hashCode = (hashCode * 53) ^ _schemaName.GetHashCode();
+                var hashCode = nameof(CreateTableMigration).Sha356Hash();
+                if (_parent != null)
+                    hashCode = (hashCode * 53) ^ _parent.GetHashCode();
                 if (_tableName != null)
-                    hashCode = (hashCode * 53) ^ _tableName.GetHashCode();
+                    hashCode = (hashCode * 53) ^ _tableName.Sha356Hash();
                 return hashCode;
             }
         }
