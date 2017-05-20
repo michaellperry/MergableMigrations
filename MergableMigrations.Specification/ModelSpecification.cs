@@ -12,8 +12,9 @@ namespace MergableMigrations.Specification
 
         public DatabaseSpecification CreateDatabase(string name)
         {
-            _migrationHistoryBuilder.Append(new CreateDatabaseMigration(name));
-            return new DatabaseSpecification(name, _migrationHistoryBuilder);
+            var migration = new CreateDatabaseMigration(name);
+            _migrationHistoryBuilder.Append(migration);
+            return new DatabaseSpecification(migration, _migrationHistoryBuilder);
         }
     }
 }

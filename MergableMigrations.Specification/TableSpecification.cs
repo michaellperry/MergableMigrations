@@ -5,25 +5,19 @@ namespace MergableMigrations.Specification
 {
     public class TableSpecification
     {
-        private readonly string _databaseName;
-        private readonly string _schemaName;
-        private readonly string _tableName;
         private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
         private readonly CreateTableMigration _migration;
 
-        internal TableSpecification(string databaseName, string schemaName, string tableName, MigrationHistoryBuilder migrationHistoryBuilder, CreateTableMigration migration)
+        internal TableSpecification(CreateTableMigration migration, MigrationHistoryBuilder migrationHistoryBuilder)
         {
-            _databaseName = databaseName;
-            _schemaName = schemaName;
-            _tableName = tableName;
-            _migrationHistoryBuilder = migrationHistoryBuilder;
             _migration = migration;
+            _migrationHistoryBuilder = migrationHistoryBuilder;
         }
 
         public ColumnSpecification CreateIntColumn(string columnName, bool nullable = false)
         {
             var childMigration = new CreateColumnMigration(
-                _databaseName, _schemaName, _tableName,
+                _migration,
                 columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}",
                 _migrationHistoryBuilder);
             _migration.AddColumn(childMigration);

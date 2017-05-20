@@ -5,18 +5,23 @@ namespace MergableMigrations.Specification
 {
     public class DatabaseSpecification
     {
-        private readonly string _databaseName;
+        private readonly CreateDatabaseMigration _parent;
         private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
 
-        public DatabaseSpecification(string databaseName, MigrationHistoryBuilder migrationHistoryBuilder)
+        private string DatabaseName => _parent.DatabaseName;
+
+        internal DatabaseSpecification(CreateDatabaseMigration parent, MigrationHistoryBuilder migrationHistoryBuilder)
         {
-            _databaseName = databaseName;
+            _parent = parent;
             _migrationHistoryBuilder = migrationHistoryBuilder;
         }
 
         public SchemaSpecification UseSchema(string schemaName)
         {
-            return new SchemaSpecification(_databaseName, schemaName, _migrationHistoryBuilder);
+            var migration = new UseSchemaMigration(_parent, schemaName);
+            _migrationHistoryBuilder.Append(migration);
+            return new SchemaSpecification(
+                migration, _migrationHistoryBuilder);
         }
     }
 }

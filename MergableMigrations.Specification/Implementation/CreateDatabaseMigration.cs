@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Immutable;
-
-namespace MergableMigrations.Specification.Implementation
+﻿namespace MergableMigrations.Specification.Implementation
 {
-    public class CreateDatabaseMigration : Migration
+    class CreateDatabaseMigration : Migration
     {
         private readonly string _name;
+
+        public string DatabaseName => _name;
 
         public CreateDatabaseMigration(string name)
         {

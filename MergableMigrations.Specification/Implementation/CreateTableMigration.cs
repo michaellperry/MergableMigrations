@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 
 namespace MergableMigrations.Specification.Implementation
@@ -12,6 +11,10 @@ namespace MergableMigrations.Specification.Implementation
 
         private ImmutableList<CreateColumnMigration> _columns =
             ImmutableList<CreateColumnMigration>.Empty;
+
+        public string DatabaseName => _databaseName;
+        public string SchemaName => _schemaName;
+        public string TableName => _tableName;
 
         public CreateTableMigration(string databaseName, string schemaName, string tableName)
         {
@@ -49,7 +52,7 @@ namespace MergableMigrations.Specification.Implementation
 
         private string GenerateColumnSql(CreateColumnMigration column)
         {
-            return $"\r\n    [{column.Name}] {column.TypeDescriptor}";
+            return $"\r\n    [{column.ColumnName}] {column.TypeDescriptor}";
         }
 
         public bool Equals(CreateTableMigration other)
