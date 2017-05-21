@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -44,6 +45,11 @@ namespace MergableMigrations.Specification.Implementation
         public bool Contains(Migration migration)
         {
             return _migrationSet.Contains(migration);
+        }
+
+        public IEnumerable<MigrationMemento> GetMementos()
+        {
+            return _migrations.Select(m => m.GetMemento());
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using MergableMigrations.Specification.Implementation;
+﻿using System;
+using MergableMigrations.Specification.Implementation;
+using System.Collections.Generic;
 
 namespace MergableMigrations.Specification
 {
@@ -62,6 +64,19 @@ namespace MergableMigrations.Specification
                     hashCode = (hashCode * 53) ^ _typeDescriptor.Sha356Hash();
                 return hashCode;
             }
+        }
+
+        internal override MigrationMemento GetMemento()
+        {
+            return new MigrationMemento(
+                nameof(CreateColumnMigration),
+                new Dictionary<string, string>
+                {
+                    [nameof(ColumnName)] = ColumnName,
+                    [nameof(TypeDescriptor)] = TypeDescriptor
+                },
+                GetHashCode(),
+                new List<int> { _parent.GetHashCode() });
         }
     }
 }

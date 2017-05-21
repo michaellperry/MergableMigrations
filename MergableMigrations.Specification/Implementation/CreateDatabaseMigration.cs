@@ -1,4 +1,7 @@
-﻿namespace MergableMigrations.Specification.Implementation
+﻿using System;
+using System.Collections.Generic;
+
+namespace MergableMigrations.Specification.Implementation
 {
     class CreateDatabaseMigration : Migration
     {
@@ -46,6 +49,18 @@
                     hashCode = (hashCode * 53) ^ _name.Sha356Hash();
                 return hashCode;
             }
+        }
+
+        internal override MigrationMemento GetMemento()
+        {
+            return new MigrationMemento(
+                nameof(CreateDatabaseMigration),
+                new Dictionary<string, string>
+                {
+                    [nameof(DatabaseName)] = DatabaseName
+                },
+                GetHashCode(),
+                new List<int> { });
         }
     }
 }

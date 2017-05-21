@@ -1,4 +1,7 @@
-﻿namespace MergableMigrations.Specification.Implementation
+﻿using System;
+using System.Collections.Generic;
+
+namespace MergableMigrations.Specification.Implementation
 {
     class UseSchemaMigration : Migration
     {
@@ -47,6 +50,18 @@
                     hashCode = (hashCode * 53) ^ _schemaName.Sha356Hash();
                 return hashCode;
             }
+        }
+
+        internal override MigrationMemento GetMemento()
+        {
+            return new MigrationMemento(
+                nameof(UseSchemaMigration),
+                new Dictionary<string, string>
+                {
+                    [nameof(SchemaName)] = SchemaName
+                },
+                GetHashCode(),
+                new List<int> { _parent.GetHashCode() });
         }
     }
 }

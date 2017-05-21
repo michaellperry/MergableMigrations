@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace MergableMigrations.Specification.Implementation
@@ -80,6 +82,18 @@ namespace MergableMigrations.Specification.Implementation
                     hashCode = (hashCode * 53) ^ _tableName.Sha356Hash();
                 return hashCode;
             }
+        }
+
+        internal override MigrationMemento GetMemento()
+        {
+            return new MigrationMemento(
+                nameof(CreateTableMigration),
+                new Dictionary<string, string>
+                {
+                    [nameof(TableName)] = TableName
+                },
+                GetHashCode(),
+                new List<int> { _parent.GetHashCode() });
         }
     }
 }

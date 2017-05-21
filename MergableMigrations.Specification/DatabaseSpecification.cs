@@ -20,8 +20,7 @@ namespace MergableMigrations.Specification
         {
             var migration = new UseSchemaMigration(_parent, schemaName);
             _migrationHistoryBuilder.Append(migration);
-            return new SchemaSpecification(
-                migration, _migrationHistoryBuilder);
+            return new SchemaSpecification(migration, _migrationHistoryBuilder);
         }
     }
 }
