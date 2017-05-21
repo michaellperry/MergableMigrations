@@ -2,6 +2,7 @@
 using MergableMigrations.Specification.Implementation;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Linq;
 
 namespace MergableMigrations.Specification
 {
@@ -52,7 +53,10 @@ namespace MergableMigrations.Specification
                     [nameof(TypeDescriptor)] = TypeDescriptor
                 },
                 Sha256Hash,
-                new List<BigInteger> { _parent.Sha256Hash });
+                new Dictionary<string, IEnumerable<BigInteger>>
+                {
+                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
+                });
         }
     }
 }

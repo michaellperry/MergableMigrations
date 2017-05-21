@@ -9,14 +9,16 @@ namespace MergableMigrations.Specification.Implementation
         public string Type { get; }
         public ImmutableDictionary<string, string> Attributes { get; }
         public BigInteger HashCode { get; }
-        public ImmutableList<BigInteger> Prerequisites { get; }
+        public ImmutableDictionary<string, ImmutableList<BigInteger>> Prerequisites { get; }
 
-        public MigrationMemento(string type, IDictionary<string, string> attributes, BigInteger hashCode, IEnumerable<BigInteger> prerequisites)
+        public MigrationMemento(string type, IDictionary<string, string> attributes, BigInteger hashCode, IDictionary<string, IEnumerable<BigInteger>> prerequisites)
         {
             Type = type;
             Attributes = attributes.ToImmutableDictionary();
             HashCode = hashCode;
-            Prerequisites = prerequisites.ToImmutableList();
+            Prerequisites = prerequisites.ToImmutableDictionary(
+                x => x.Key,
+                x => x.Value.ToImmutableList());
         }
     }
 }

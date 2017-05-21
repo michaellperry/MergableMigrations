@@ -51,18 +51,18 @@ namespace Mathematicians.UnitTests
 
             mementos[1].Type.Should().Be("UseSchemaMigration");
             mementos[1].Attributes["SchemaName"].Should().Be("dbo");
-            mementos[1].Prerequisites.Should().Contain(mementos[0].HashCode);
+            mementos[1].Prerequisites["Parent"].Should().Contain(mementos[0].HashCode);
 
             mementos[2].Type.Should().Be("CreateTableMigration");
             mementos[2].Attributes["TableName"].Should().Be("Mathematician");
-            mementos[2].Prerequisites.Should().Contain(mementos[1].HashCode);
+            mementos[2].Prerequisites["Parent"].Should().Contain(mementos[1].HashCode);
         }
 
         [Fact]
         public void CanUpgradeToANewVersion()
         {
             var previousVersion = GivenMigrationMementos(new Migrations());
-            MigrationHistory migrationHistory = WhenLoadMigrationHistory(previousVersion);
+            var migrationHistory = WhenLoadMigrationHistory(previousVersion);
             var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
 
             sql.Length.Should().Be(2);

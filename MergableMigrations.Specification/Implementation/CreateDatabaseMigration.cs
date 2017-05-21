@@ -40,7 +40,7 @@ namespace MergableMigrations.Specification.Implementation
                     [nameof(DatabaseName)] = DatabaseName
                 },
                 Sha256Hash,
-                new List<BigInteger> { });
+                new Dictionary<string, IEnumerable<BigInteger>> { });
         }
     }
 }

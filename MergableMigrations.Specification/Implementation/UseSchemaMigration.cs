@@ -40,7 +40,10 @@ namespace MergableMigrations.Specification.Implementation
                     [nameof(SchemaName)] = SchemaName
                 },
                 Sha256Hash,
-                new List<BigInteger> { _parent.Sha256Hash });
+                new Dictionary<string, IEnumerable<BigInteger>>
+                {
+                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
+                });
         }
     }
 }

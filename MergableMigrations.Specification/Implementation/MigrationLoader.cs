@@ -16,15 +16,15 @@ namespace MergableMigrations.Specification.Implementation
                         memento.Attributes["DatabaseName"]);
                 case nameof(UseSchemaMigration):
                     return new UseSchemaMigration(
-                        (CreateDatabaseMigration)migrationsByHashCode[memento.Prerequisites.First()],
+                        (CreateDatabaseMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                         memento.Attributes["SchemaName"]);
                 case nameof(CreateTableMigration):
                     return new CreateTableMigration(
-                        (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites.First()],
+                        (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                         memento.Attributes["TableName"]);
                 case nameof(CreateColumnMigration):
                     return new CreateColumnMigration(
-                        (CreateTableMigration)migrationsByHashCode[memento.Prerequisites.First()],
+                        (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                         memento.Attributes["ColumnName"],
                         memento.Attributes["TypeDescriptor"]);
                 default:

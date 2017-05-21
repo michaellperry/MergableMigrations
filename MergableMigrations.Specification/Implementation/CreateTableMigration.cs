@@ -72,7 +72,10 @@ namespace MergableMigrations.Specification.Implementation
                     [nameof(TableName)] = TableName
                 },
                 Sha256Hash,
-                new List<BigInteger> { _parent.Sha256Hash });
+                new Dictionary<string, IEnumerable<BigInteger>>
+                {
+                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
+                });
         }
     }
 }
