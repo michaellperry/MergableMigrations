@@ -56,10 +56,10 @@ namespace MergableMigrations.Specification.Implementation
             return $"\r\n    [{column.ColumnName}] {column.TypeDescriptor}";
         }
 
-        internal override BigInteger Sha256Hash()
+        protected override BigInteger ComputeSha256Hash()
         {
             return nameof(CreateTableMigration).Sha256Hash().Concatenate(
-                _parent.Sha256Hash(),
+                _parent.Sha256Hash,
                 _tableName.Sha256Hash());
         }
 
@@ -71,8 +71,8 @@ namespace MergableMigrations.Specification.Implementation
                 {
                     [nameof(TableName)] = TableName
                 },
-                Sha256Hash(),
-                new List<BigInteger> { _parent.Sha256Hash() });
+                Sha256Hash,
+                new List<BigInteger> { _parent.Sha256Hash });
         }
     }
 }

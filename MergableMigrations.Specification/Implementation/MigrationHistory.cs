@@ -63,7 +63,7 @@ namespace MergableMigrations.Specification.Implementation
                 var migration = MigrationLoader.Load(memento, migrationsByHashCode);
                 migrations = migrations.Add(migration);
                 migrationsByHashCode = migrationsByHashCode
-                    .Add(migration.Sha256Hash(), migration);
+                    .Add(migration.Sha256Hash, migration);
 
             }
 

@@ -25,7 +25,7 @@ namespace MergableMigrations.Specification.Implementation
             return sql;
         }
 
-        internal override BigInteger Sha256Hash()
+        protected override BigInteger ComputeSha256Hash()
         {
             return nameof(CreateDatabaseMigration).Sha256Hash().Concatenate(
                 _databaseName.Sha256Hash());
@@ -39,7 +39,7 @@ namespace MergableMigrations.Specification.Implementation
                 {
                     [nameof(DatabaseName)] = DatabaseName
                 },
-                Sha256Hash(),
+                Sha256Hash,
                 new List<BigInteger> { });
         }
     }

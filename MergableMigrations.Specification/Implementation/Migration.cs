@@ -5,9 +5,18 @@ namespace MergableMigrations.Specification.Implementation
 {
     public abstract class Migration
     {
+        private Lazy<BigInteger> _sha256Hash;
+
+        protected Migration()
+        {
+            _sha256Hash = new Lazy<BigInteger>(ComputeSha256Hash);
+        }
+
         public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected);
         internal abstract MigrationMemento GetMemento();
-        internal abstract BigInteger Sha256Hash();
+        protected abstract BigInteger ComputeSha256Hash();
+
+        internal BigInteger Sha256Hash => _sha256Hash.Value;
 
         public override bool Equals(object obj)
         {
@@ -22,12 +31,12 @@ namespace MergableMigrations.Specification.Implementation
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return other.Sha256Hash() == this.Sha256Hash();
+            return other.Sha256Hash == this.Sha256Hash;
         }
 
         public override int GetHashCode()
         {
-            return BitConverter.ToInt32(Sha256Hash().ToByteArray(), 0);
+            return BitConverter.ToInt32(Sha256Hash.ToByteArray(), 0);
         }
     }
 }
