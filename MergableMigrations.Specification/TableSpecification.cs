@@ -18,8 +18,7 @@ namespace MergableMigrations.Specification
         {
             var childMigration = new CreateColumnMigration(
                 _migration,
-                columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}",
-                _migrationHistoryBuilder);
+                columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}");
             _migration.AddColumn(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
             return new ColumnSpecification();

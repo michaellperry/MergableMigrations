@@ -5,20 +5,20 @@ namespace MergableMigrations.Specification.Implementation
 {
     class CreateDatabaseMigration : Migration
     {
-        private readonly string _name;
+        private readonly string _databaseName;
 
-        public string DatabaseName => _name;
+        public string DatabaseName => _databaseName;
 
-        public CreateDatabaseMigration(string name)
+        public CreateDatabaseMigration(string databaseName)
         {
-            _name = name;
+            _databaseName = databaseName;
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
             string[] sql =
             {
-                $"CREATE DATABASE [{_name}]"
+                $"CREATE DATABASE [{_databaseName}]"
             };
 
             return sql;
@@ -30,7 +30,7 @@ namespace MergableMigrations.Specification.Implementation
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return Equals(_name, other._name);
+            return Equals(_databaseName, other._databaseName);
         }
 
         public override bool Equals(object obj)
@@ -45,8 +45,8 @@ namespace MergableMigrations.Specification.Implementation
             unchecked
             {
                 var hashCode = nameof(CreateDatabaseMigration).Sha356Hash();
-                if (_name != null)
-                    hashCode = (hashCode * 53) ^ _name.Sha356Hash();
+                if (_databaseName != null)
+                    hashCode = (hashCode * 53) ^ _databaseName.Sha356Hash();
                 return hashCode;
             }
         }

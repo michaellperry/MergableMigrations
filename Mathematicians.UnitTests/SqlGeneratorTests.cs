@@ -4,6 +4,7 @@ using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
 using System.Linq;
 using Xunit;
+using System;
 
 namespace Mathematicians.UnitTests
 {
@@ -33,8 +34,7 @@ namespace Mathematicians.UnitTests
         {
             var migrations = new Migrations();
             var migrationHistory = GivenCompleteMigrationHistory(migrations);
-            var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
-            var sql = sqlGenerator.Generate();
+            var sql = WhenGenerateSql(migrations, migrationHistory);
 
             sql.Length.Should().Be(0);
         }
@@ -42,8 +42,7 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void CanSaveMigrationHistory()
         {
-            var migrationHistory = GivenCompleteMigrationHistory(new Migrations());
-            var mementos = migrationHistory.GetMementos().ToArray();
+            var mementos = GivenMigrationMementos(new Migrations());
 
             mementos.Length.Should().Be(9);
 
@@ -62,11 +61,43 @@ namespace Mathematicians.UnitTests
             mementos[2].HashCode.Should().Be(-138479862);
         }
 
-        private MigrationHistory GivenCompleteMigrationHistory(Migrations migrations)
+        [Fact]
+        public void CanUpgradeToANewVersion()
+        {
+            var previousVersion = GivenMigrationMementos(new Migrations());
+            MigrationHistory migrationHistory = WhenLoadMigrationHistory(previousVersion);
+            var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
+
+            sql.Length.Should().Be(2);
+            sql[0].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Field](
+    [FieldId] INT NOT NULL)");
+            sql[1].Should().Be(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
+    ADD [FieldId] INT NOT NULL");
+        }
+
+        private MigrationHistory WhenLoadMigrationHistory(MigrationMemento[] mementos)
+        {
+            return MigrationHistory.LoadMementos(mementos);
+        }
+
+        private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)
+        {
+            var migrationHistory = GivenCompleteMigrationHistory(migrations);
+            return migrationHistory.GetMementos().ToArray();
+        }
+
+        private MigrationHistory GivenCompleteMigrationHistory(IMigrations migrations)
         {
             var model = new ModelSpecification();
             migrations.AddMigrations(model);
             return model.MigrationHistory;
+        }
+
+        private static string[] WhenGenerateSql(IMigrations migrations, MigrationHistory migrationHistory)
+        {
+            var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
+            var sql = sqlGenerator.Generate();
+            return sql;
         }
     }
 }

@@ -51,5 +51,24 @@ namespace MergableMigrations.Specification.Implementation
         {
             return _migrations.Select(m => m.GetMemento());
         }
+
+        public static MigrationHistory LoadMementos(MigrationMemento[] mementos)
+        {
+            var migrations = ImmutableList<Migration>.Empty;
+            var migrationsByHashCode = ImmutableDictionary<int, Migration>.Empty;
+
+            foreach (var memento in mementos)
+            {
+                var migration = MigrationLoader.Load(memento, migrationsByHashCode);
+                migrations = migrations.Add(migration);
+                migrationsByHashCode = migrationsByHashCode
+                    .Add(migration.GetHashCode(), migration);
+
+            }
+
+            var migrationSet = migrations.ToImmutableHashSet();
+
+            return new MigrationHistory(migrations, migrationSet);
+        }
     }
 }

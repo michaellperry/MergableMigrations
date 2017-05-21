@@ -9,7 +9,6 @@ namespace MergableMigrations.Specification
         private readonly CreateTableMigration _parent;
         private readonly string _columnName;
         private readonly string _typeDescriptor;
-        private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
 
         public string DatabaseName => _parent.DatabaseName;
         public string SchemaName => _parent.SchemaName;
@@ -17,19 +16,18 @@ namespace MergableMigrations.Specification
         public string ColumnName => _columnName;
         public string TypeDescriptor => _typeDescriptor;
 
-        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, MigrationHistoryBuilder migrationHistoryBuilder)
+        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor)
         {
             _parent = parent;
             _columnName = columnName;
             _typeDescriptor = typeDescriptor;
-            _migrationHistoryBuilder = migrationHistoryBuilder;
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
             string[] sql =
             {
-                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\n    ADD [{ColumnName}] [{TypeDescriptor}]"
+                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    ADD [{ColumnName}] {TypeDescriptor}"
             };
 
             return sql;
