@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -55,33 +56,11 @@ namespace MergableMigrations.Specification.Implementation
             return $"\r\n    [{column.ColumnName}] {column.TypeDescriptor}";
         }
 
-        public bool Equals(CreateTableMigration other)
+        internal override BigInteger Sha256Hash()
         {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            return Equals(_tableName, other._tableName) && Equals(_parent, other._parent);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is CreateTableMigration)
-                return Equals((CreateTableMigration)obj);
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = nameof(CreateTableMigration).Sha356Hash();
-                if (_parent != null)
-                    hashCode = (hashCode * 53) ^ _parent.GetHashCode();
-                if (_tableName != null)
-                    hashCode = (hashCode * 53) ^ _tableName.Sha356Hash();
-                return hashCode;
-            }
+            return nameof(CreateTableMigration).Sha256Hash().Concatenate(
+                _parent.Sha256Hash(),
+                _tableName.Sha256Hash());
         }
 
         internal override MigrationMemento GetMemento()
@@ -92,8 +71,8 @@ namespace MergableMigrations.Specification.Implementation
                 {
                     [nameof(TableName)] = TableName
                 },
-                GetHashCode(),
-                new List<int> { _parent.GetHashCode() });
+                Sha256Hash(),
+                new List<BigInteger> { _parent.Sha256Hash() });
         }
     }
 }

@@ -48,17 +48,14 @@ namespace Mathematicians.UnitTests
 
             mementos[0].Type.Should().Be("CreateDatabaseMigration");
             mementos[0].Attributes["DatabaseName"].Should().Be("Mathematicians");
-            mementos[0].HashCode.Should().Be(849757297);
 
             mementos[1].Type.Should().Be("UseSchemaMigration");
             mementos[1].Attributes["SchemaName"].Should().Be("dbo");
-            mementos[1].Prerequisites.Should().Contain(849757297);
-            mementos[1].HashCode.Should().Be(1290054232);
+            mementos[1].Prerequisites.Should().Contain(mementos[0].HashCode);
 
             mementos[2].Type.Should().Be("CreateTableMigration");
             mementos[2].Attributes["TableName"].Should().Be("Mathematician");
-            mementos[2].Prerequisites.Should().Contain(1290054232);
-            mementos[2].HashCode.Should().Be(-138479862);
+            mementos[2].Prerequisites.Should().Contain(mementos[1].HashCode);
         }
 
         [Fact]
@@ -75,11 +72,6 @@ namespace Mathematicians.UnitTests
     ADD [FieldId] INT NOT NULL");
         }
 
-        private MigrationHistory WhenLoadMigrationHistory(MigrationMemento[] mementos)
-        {
-            return MigrationHistory.LoadMementos(mementos);
-        }
-
         private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)
         {
             var migrationHistory = GivenCompleteMigrationHistory(migrations);
@@ -93,11 +85,15 @@ namespace Mathematicians.UnitTests
             return model.MigrationHistory;
         }
 
+        private MigrationHistory WhenLoadMigrationHistory(MigrationMemento[] mementos)
+        {
+            return MigrationHistory.LoadMementos(mementos);
+        }
+
         private static string[] WhenGenerateSql(IMigrations migrations, MigrationHistory migrationHistory)
         {
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
-            var sql = sqlGenerator.Generate();
-            return sql;
+            return sqlGenerator.Generate();
         }
     }
 }

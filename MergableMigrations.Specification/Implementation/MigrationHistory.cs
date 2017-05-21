@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -55,14 +56,14 @@ namespace MergableMigrations.Specification.Implementation
         public static MigrationHistory LoadMementos(MigrationMemento[] mementos)
         {
             var migrations = ImmutableList<Migration>.Empty;
-            var migrationsByHashCode = ImmutableDictionary<int, Migration>.Empty;
+            var migrationsByHashCode = ImmutableDictionary<BigInteger, Migration>.Empty;
 
             foreach (var memento in mementos)
             {
                 var migration = MigrationLoader.Load(memento, migrationsByHashCode);
                 migrations = migrations.Add(migration);
                 migrationsByHashCode = migrationsByHashCode
-                    .Add(migration.GetHashCode(), migration);
+                    .Add(migration.Sha256Hash(), migration);
 
             }
 

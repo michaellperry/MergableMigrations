@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
@@ -24,31 +25,10 @@ namespace MergableMigrations.Specification.Implementation
             return sql;
         }
 
-        public bool Equals(CreateDatabaseMigration other)
+        internal override BigInteger Sha256Hash()
         {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            return Equals(_databaseName, other._databaseName);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is CreateDatabaseMigration)
-                return Equals((CreateDatabaseMigration)obj);
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = nameof(CreateDatabaseMigration).Sha356Hash();
-                if (_databaseName != null)
-                    hashCode = (hashCode * 53) ^ _databaseName.Sha356Hash();
-                return hashCode;
-            }
+            return nameof(CreateDatabaseMigration).Sha256Hash().Concatenate(
+                _databaseName.Sha256Hash());
         }
 
         internal override MigrationMemento GetMemento()
@@ -59,8 +39,8 @@ namespace MergableMigrations.Specification.Implementation
                 {
                     [nameof(DatabaseName)] = DatabaseName
                 },
-                GetHashCode(),
-                new List<int> { });
+                Sha256Hash(),
+                new List<BigInteger> { });
         }
     }
 }

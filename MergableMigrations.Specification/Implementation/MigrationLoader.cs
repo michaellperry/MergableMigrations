@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
     static class MigrationLoader
     {
-        public static Migration Load(MigrationMemento memento, IImmutableDictionary<int, Migration> migrationsByHashCode)
+        public static Migration Load(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
             switch (memento.Type)
             {
