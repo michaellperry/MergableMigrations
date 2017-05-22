@@ -1,4 +1,5 @@
 ﻿using MergableMigrations.Specification.Implementation;
+using System.Collections.Generic;
 
 namespace MergableMigrations.Specification
 {
@@ -7,12 +8,14 @@ namespace MergableMigrations.Specification
         private MigrationHistoryBuilder _migrationHistoryBuilder =
             new MigrationHistoryBuilder();
 
+        public string DatabaseName { get; private set; }
         public MigrationHistory MigrationHistory =>
             _migrationHistoryBuilder.MigrationHistory;
 
-        public DatabaseSpecification CreateDatabase(string name)
+        public DatabaseSpecification CreateDatabase(string databaseName)
         {
-            var migration = new CreateDatabaseMigration(name);
+            DatabaseName = databaseName;
+            var migration = new CreateDatabaseMigration(databaseName);
             _migrationHistoryBuilder.Append(migration);
             return new DatabaseSpecification(migration, _migrationHistoryBuilder);
         }

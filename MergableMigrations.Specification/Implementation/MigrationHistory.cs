@@ -60,6 +60,8 @@ namespace MergableMigrations.Specification.Implementation
             foreach (var memento in mementos)
             {
                 var migration = MigrationLoader.Load(memento, migrationsByHashCode);
+                if (migration.Sha256Hash != memento.HashCode)
+                    throw new ArgumentException("Hash code does not match");
                 migrations = migrations.Add(migration);
                 migrationsByHashCode = migrationsByHashCode
                     .Add(migration.Sha256Hash, migration);

@@ -18,13 +18,12 @@ namespace Mathematicians.UnitTests
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
             var sql = sqlGenerator.Generate();
 
-            sql.Length.Should().Be(3);
-            sql[0].Should().Be("CREATE DATABASE [Mathematicians]");
-            sql[1].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
+            sql.Length.Should().Be(6);
+            sql[2].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
     [MathematicianId] INT NOT NULL,
     [BirthYear] INT NOT NULL,
     [DeathYear] INT NULL)");
-            sql[2].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
+            sql[4].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
     [ContributionId] INT NOT NULL,
     [MathematicianId] INT NOT NULL)");
         }
@@ -65,10 +64,10 @@ namespace Mathematicians.UnitTests
             var migrationHistory = WhenLoadMigrationHistory(previousVersion);
             var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
 
-            sql.Length.Should().Be(2);
+            sql.Length.Should().Be(4);
             sql[0].Should().Be(@"CREATE TABLE [Mathematicians].[dbo].[Field](
     [FieldId] INT NOT NULL)");
-            sql[1].Should().Be(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
+            sql[2].Should().Be(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
     ADD [FieldId] INT NOT NULL");
         }
 

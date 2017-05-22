@@ -1,10 +1,13 @@
 ﻿using MergableMigrations.EF6;
 using MergableMigrations.Specification.Implementation;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace Mathematicians.Web.Data
 {
@@ -53,7 +56,7 @@ namespace Mathematicians.Web.Data
             if (ids.Any())
             {
                 var mementos = ExecuteSqlQuery(Master,
-                    $"SELECT Type FROM [{DatabaseName}].[dbo].[__MergableMigrationHistory]",
+                    $"SELECT [Type], [HashCode],[Body] FROM [{DatabaseName}].[dbo].[__MergableMigrationHistory]",
                     row => LoadMigrationMemento(
                         (string)row["Type"],
                         (byte[])row["HashCode"],
@@ -68,28 +71,39 @@ namespace Mathematicians.Web.Data
 
         private static MigrationMemento LoadMigrationMemento(string type, byte[] hashCode, string body)
         {
-            var attributes = (IDictionary<string, string>)null;
-            var prerequisites = (IDictionary<string, IEnumerable<System.Numerics.BigInteger>>)null;
+            var migrationBody = JsonConvert.DeserializeObject<MigrationBody>(body);
+            var attributes = migrationBody.Attributes;
+            var prerequisites = migrationBody.Prerequisites.ToDictionary(
+                x => x.Key,
+                x => x.Value.Select(ParseHex));
             var memento = new MigrationMemento(
                 type,
                 attributes,
-                new System.Numerics.BigInteger(hashCode),
+                new BigInteger(hashCode.Reverse().ToArray()),
                 prerequisites);
             return memento;
         }
 
+        private static BigInteger ParseHex(string str)
+        {
+            BigInteger result = BigInteger.Parse(str.Substring(2), NumberStyles.AllowHexSpecifier);
+            var originalStr = $"0x{result.ToString("X")}";
+            System.Diagnostics.Debug.Assert(str == originalStr);
+            return result;
+        }
+
         public void DestroyDatabase()
         {
-            var fileNames = ExecuteSqlQuery(Master, @"
+            var fileNames = ExecuteSqlQuery(Master, $@"
                 SELECT [physical_name] FROM [sys].[master_files]
-                WHERE [database_id] = DB_ID('Globalmantics')",
+                WHERE [database_id] = DB_ID('{DatabaseName}')",
                 row => (string)row["physical_name"]);
 
             if (fileNames.Any())
             {
-                ExecuteSqlCommand(Master, @"
-                    ALTER DATABASE [Globalmantics] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                    EXEC sp_detach_db 'Globalmantics'");
+                ExecuteSqlCommand(Master, $@"
+                    ALTER DATABASE [{DatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                    EXEC sp_detach_db '{DatabaseName}'");
 
                 fileNames.ForEach(File.Delete);
             }
