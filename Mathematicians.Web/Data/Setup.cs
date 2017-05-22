@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -34,10 +33,19 @@ namespace Mathematicians.Web.Data
                         ON (NAME = '{DatabaseName}',
                         FILENAME = '{_fileName}')",
                     $@"CREATE TABLE [{DatabaseName}].[dbo].[__MergableMigrationHistory](
-                        [MigrationId] INT IDENTITY(1,1) NOT NULL,
+                        [MigrationId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
                         [Type] VARCHAR(50) NOT NULL,
                         [HashCode] VARBINARY(32) NOT NULL,
-                        [Body] NVARCHAR(MAX) NOT NULL)"
+                        [Attributes] NVARCHAR(MAX) NOT NULL,
+	                    INDEX [IX_MergableMigration_HashCode] UNIQUE ([HashCode]))",
+                    $@"CREATE TABLE [{DatabaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] (
+	                    [MigrationId] INT NOT NULL,
+	                    [Role] NVARCHAR(50) NOT NULL,
+	                    [PrerequisiteMigrationId] INT NOT NULL,
+	                    INDEX [IX_MergableMigrationPrerequisite_MigrationId] ([MigrationId]),
+	                    FOREIGN KEY ([MigrationId]) REFERENCES [Mathematicians].[dbo].[__MergableMigrationHistory],
+	                    INDEX [IX_MergableMigrationPrerequisite_PrerequisiteMigrationId] ([PrerequisiteMigrationId]),
+	                    FOREIGN KEY ([PrerequisiteMigrationId]) REFERENCES [Mathematicians].[dbo].[__MergableMigrationHistory])"
                 };
                 ExecuteSqlCommands(Master, initialize);
             }
@@ -55,13 +63,24 @@ namespace Mathematicians.Web.Data
                 row => (int)row["database_id"]);
             if (ids.Any())
             {
-                var mementos = ExecuteSqlQuery(Master,
-                    $"SELECT [Type], [HashCode],[Body] FROM [{DatabaseName}].[dbo].[__MergableMigrationHistory]",
-                    row => LoadMigrationMemento(
-                        (string)row["Type"],
-                        (byte[])row["HashCode"],
-                        (string)row["Body"]));
-                return MigrationHistory.LoadMementos(mementos);
+                var rows = ExecuteSqlQuery(Master,
+                    $@"SELECT h.[Type], h.[HashCode], h.[Attributes], j.[Role], p.[HashCode] AS [PrerequisiteHashCode]
+                        FROM [{DatabaseName}].[dbo].[__MergableMigrationHistory] h
+                        LEFT JOIN [{DatabaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] j
+                          ON h.MigrationId = j.MigrationId
+                        LEFT JOIN [{DatabaseName}].[dbo].[__MergableMigrationHistory] p
+                          ON j.PrerequisiteMigrationId = p.MigrationId
+                        ORDER BY h.MigrationId, j.Role, p.MigrationId",
+                    row => new MigrationHistoryRow
+                    {
+                        Type = LoadString(row["Type"]),
+                        HashCode = LoadBigInteger(row["HashCode"]),
+                        Attributes = LoadString(row["Attributes"]),
+                        Role = LoadString(row["Role"]),
+                        PrerequisiteHashCode = LoadBigInteger(row["PrerequisiteHashCode"])
+                    });
+
+                return MigrationHistory.LoadMementos(LoadMementos(rows));
             }
             else
             {
@@ -69,27 +88,77 @@ namespace Mathematicians.Web.Data
             }
         }
 
-        private static MigrationMemento LoadMigrationMemento(string type, byte[] hashCode, string body)
+        private static IEnumerable<MigrationMemento> LoadMementos(
+            IEnumerable<MigrationHistoryRow> rows)
         {
-            var migrationBody = JsonConvert.DeserializeObject<MigrationBody>(body);
-            var attributes = migrationBody.Attributes;
-            var prerequisites = migrationBody.Prerequisites.ToDictionary(
-                x => x.Key,
-                x => x.Value.Select(ParseHex));
+            var enumerator = new LookaheadEnumerator<MigrationHistoryRow>(rows.GetEnumerator());
+            if (enumerator.MoveNext())
+            {
+                do
+                {
+                    yield return LoadMemento(enumerator);
+                } while (enumerator.More);
+            }
+        }
+
+        private static MigrationMemento LoadMemento(LookaheadEnumerator<MigrationHistoryRow> enumerator)
+        {
+            var type = enumerator.Current.Type;
+            var hashCode = enumerator.Current.HashCode;
+            var attributes = enumerator.Current.Attributes;
+            var roles = LoadRoles(hashCode, enumerator);
+
+            var migrationAttributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(attributes);
             var memento = new MigrationMemento(
                 type,
-                attributes,
-                new BigInteger(hashCode.Reverse().ToArray()),
-                prerequisites);
+                migrationAttributes,
+                hashCode,
+                roles);
             return memento;
         }
 
-        private static BigInteger ParseHex(string str)
+        private static IDictionary<string, IEnumerable<BigInteger>> LoadRoles(BigInteger hashCode, LookaheadEnumerator<MigrationHistoryRow> enumerator)
         {
-            BigInteger result = BigInteger.Parse(str.Substring(2), NumberStyles.AllowHexSpecifier);
-            var originalStr = $"0x{result.ToString("X")}";
-            System.Diagnostics.Debug.Assert(str == originalStr);
+            var result = new Dictionary<string, IEnumerable<BigInteger>>();
+            do
+            {
+                string role = enumerator.Current.Role;
+                if (role != null)
+                {
+                    var prerequisites = LoadPrerequisites(hashCode, role, enumerator).ToList();
+                    result[role] = prerequisites;
+                }
+                else
+                {
+                    enumerator.MoveNext();
+                }
+            } while (enumerator.More && enumerator.Current.HashCode == hashCode);
+
             return result;
+        }
+
+        private static IEnumerable<BigInteger> LoadPrerequisites(BigInteger hashCode, string role, LookaheadEnumerator<MigrationHistoryRow> enumerator)
+        {
+            do
+            {
+                yield return enumerator.Current.PrerequisiteHashCode;
+            } while (enumerator.MoveNext() && enumerator.Current.HashCode == hashCode && enumerator.Current.Role == role);
+        }
+
+        private static string LoadString(object value)
+        {
+            if (value is DBNull)
+                return null;
+            else
+                return (string)value;
+        }
+
+        private static BigInteger LoadBigInteger(object value)
+        {
+            if (value is DBNull)
+                return BigInteger.Zero;
+            else
+                return new BigInteger(((byte[])value).Reverse().ToArray());
         }
 
         public void DestroyDatabase()
@@ -128,15 +197,18 @@ namespace Mathematicians.Web.Data
             SqlConnectionStringBuilder connectionStringBuilder,
             IEnumerable<string> commands)
         {
-            using (var connection = new SqlConnection(connectionStringBuilder.ConnectionString))
+            if (commands.Any())
             {
-                connection.Open();
-                foreach (var commandText in commands)
+                using (var connection = new SqlConnection(connectionStringBuilder.ConnectionString))
                 {
-                    using (var command = connection.CreateCommand())
+                    connection.Open();
+                    foreach (var commandText in commands)
                     {
-                        command.CommandText = commandText;
-                        command.ExecuteNonQuery();
+                        using (var command = connection.CreateCommand())
+                        {
+                            command.CommandText = commandText;
+                            command.ExecuteNonQuery();
+                        }
                     }
                 }
             }

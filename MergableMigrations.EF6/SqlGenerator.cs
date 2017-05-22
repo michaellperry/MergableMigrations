@@ -35,7 +35,10 @@ namespace MergableMigrations.EF6
                 migrationsAffected.Append(difference.Head);
                 string[] result = difference.Head.GenerateSql(migrationsAffected);
                 sql = sql.AddRange(result);
-                sql = sql.Add(GenerateInsertStatement(model.DatabaseName, migrationsAffected.MigrationHistory.GetMementos()));
+                var menentos = migrationsAffected.MigrationHistory.GetMementos().ToList();
+                sql = sql.Add(GenerateInsertStatement(model.DatabaseName, menentos));
+                if (menentos.SelectMany(m => m.Prerequisites).SelectMany(p => p.Value).Any())
+                    sql = sql.Add(GeneratePrerequisiteInsertStatements(model.DatabaseName, menentos));
                 difference = difference.Subtract(migrationsAffected.MigrationHistory);
             }
 
@@ -44,29 +47,42 @@ namespace MergableMigrations.EF6
 
         private string GenerateInsertStatement(string databaseName, IEnumerable<MigrationMemento> migrations)
         {
-            string[] values = migrations.Select(migration => GenerateValue(migration)).ToArray();
+            string[] values = migrations.Select(migration => GenerateMigrationValue(migration)).ToArray();
             var insert = $@"INSERT INTO [{databaseName}].[dbo].[__MergableMigrationHistory]
-                ([Type], [HashCode], [Body])
-                VALUES{String.Join(",", values)}";
+    ([Type], [HashCode], [Attributes])
+    VALUES{String.Join(",", values)}";
             return insert;
         }
 
-        private string GenerateValue(MigrationMemento migration)
+        private string GenerateMigrationValue(MigrationMemento migration)
         {
-            string body = JsonConvert.SerializeObject(new MigrationBody
-            {
-                Attributes = migration.Attributes.ToDictionary(
-                    x => x.Key, x => x.Value),
-                Prerequisites = migration.Prerequisites.ToDictionary(
-                    x => x.Key, x => x.Value.Select(ToHexString).ToList())
-            }).Replace("'", "''");
-            string hex = ToHexString(migration.HashCode);
-            return $"('{migration.Type}', {hex}, '{body}')";
+            string attributes = JsonConvert.SerializeObject(migration.Attributes);
+            string hex = $"0x{migration.HashCode.ToString("X")}";
+            return $@"
+    ('{migration.Type}', {hex}, '{attributes}')";
         }
 
-        private static string ToHexString(BigInteger hashCode)
+        private string GeneratePrerequisiteInsertStatements(string databaseName, IEnumerable<MigrationMemento> migrations)
         {
-            return $"0x{hashCode.ToString("X")}";
+            var joins =
+                from migration in migrations
+                from role in migration.Prerequisites
+                from prerequisite in role.Value
+                select new { MigrationHashCode = migration.HashCode, Role = role.Key, PrerequisiteHashCode = prerequisite };
+            string[] values = joins.Select(join => GeneratePrerequisiteSelect(databaseName, join.MigrationHashCode, join.Role, join.PrerequisiteHashCode)).ToArray();
+            string sql = $@"INSERT INTO [{databaseName}].[dbo].[__MergableMigrationHistoryPrerequisite]
+    ([MigrationId], [Role], [PrerequisiteMigrationId]){string.Join(@"
+UNION ALL", values)}";
+            return sql;
+        }
+
+        string GeneratePrerequisiteSelect(string databaseName, BigInteger migrationHashCode, string role, BigInteger prerequisiteHashCode)
+        {
+            return $@"
+SELECT m.MigrationId, '{role}', p.MigrationId
+FROM [{databaseName}].[dbo].[__MergableMigrationHistory] m,
+     [{databaseName}].[dbo].[__MergableMigrationHistory] p
+WHERE m.HashCode = 0x{migrationHashCode.ToString("X")} AND p.HashCode = 0x{prerequisiteHashCode.ToString("X")}";
         }
     }
 }
