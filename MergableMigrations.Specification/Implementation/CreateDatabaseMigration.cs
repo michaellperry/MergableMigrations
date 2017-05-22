@@ -17,11 +17,7 @@ namespace MergableMigrations.Specification.Implementation
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string[] sql =
-            {
-                $"CREATE DATABASE [{_databaseName}]"
-            };
-
+            string[] sql = { };
             return sql;
         }
 

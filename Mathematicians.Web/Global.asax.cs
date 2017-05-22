@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mathematicians.Web.App_Start;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,6 +14,7 @@ namespace Mathematicians.Web
     {
         protected void Application_Start()
         {
+            DatabaseConfig.Configure(Server.MapPath("~/App_Data/Mathematicians.mdf"));
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

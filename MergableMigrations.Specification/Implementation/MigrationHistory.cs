@@ -43,17 +43,16 @@ namespace MergableMigrations.Specification.Implementation
                 migrationHistory.Contains(x)));
         }
 
-        public bool Contains(Migration migration)
-        {
-            return _migrationSet.Contains(migration);
-        }
+        public bool Empty =>
+            !_migrations.Any();
 
-        public IEnumerable<MigrationMemento> GetMementos()
-        {
-            return _migrations.Select(m => m.GetMemento());
-        }
+        public bool Contains(Migration migration) =>
+            _migrationSet.Contains(migration);
 
-        public static MigrationHistory LoadMementos(MigrationMemento[] mementos)
+        public IEnumerable<MigrationMemento> GetMementos() =>
+            _migrations.Select(m => m.GetMemento());
+
+        public static MigrationHistory LoadMementos(IEnumerable<MigrationMemento> mementos)
         {
             var migrations = ImmutableList<Migration>.Empty;
             var migrationsByHashCode = ImmutableDictionary<BigInteger, Migration>.Empty;
