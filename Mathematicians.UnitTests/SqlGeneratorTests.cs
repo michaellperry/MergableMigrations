@@ -14,8 +14,7 @@ namespace Mathematicians.UnitTests
         {
             var migrations = new Migrations();
             var migrationHistory = new MigrationHistory();
-            var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
-            var sql = sqlGenerator.Generate("Mathematicians");
+            var sql = WhenGenerateSql(migrations, migrationHistory);
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
     [MathematicianId] INT NOT NULL,
