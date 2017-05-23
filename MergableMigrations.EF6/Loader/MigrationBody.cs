@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace MergableMigrations.EF6
+namespace MergableMigrations.EF6.Loader
 {
-    public class MigrationBody
+    class MigrationBody
     {
         public Dictionary<string, string> Attributes { get; set; }
         public Dictionary<string, List<string>> Prerequisites { get; set; }

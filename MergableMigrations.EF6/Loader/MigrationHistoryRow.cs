@@ -1,13 +1,9 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace Mathematicians.Web.Data
+namespace MergableMigrations.EF6.Loader
 {
-    public class MigrationHistoryRow
+    class MigrationHistoryRow
     {
-        public MigrationHistoryRow()
-        {
-        }
         public string Attributes { get; set; }
         public BigInteger HashCode { get; set; }
         public BigInteger PrerequisiteHashCode { get; set; }

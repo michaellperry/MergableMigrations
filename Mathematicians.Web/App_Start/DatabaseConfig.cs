@@ -1,5 +1,4 @@
-﻿using Mathematicians.Web.Data;
-using System;
+﻿using MergableMigrations.EF6;
 
 namespace Mathematicians.Web.App_Start
 {
@@ -7,8 +6,8 @@ namespace Mathematicians.Web.App_Start
     {
         public static void Configure(string fileName)
         {
-            var setup = new Setup(fileName);
-            setup.MigrateDatabase();
+            var migrator = new DatabaseMigrator("Mathematicians", fileName, new Migrations());
+            migrator.MigrateDatabase();
         }
     }
 }

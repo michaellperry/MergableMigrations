@@ -4,7 +4,6 @@ using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
 using System.Linq;
 using Xunit;
-using System;
 
 namespace Mathematicians.UnitTests
 {

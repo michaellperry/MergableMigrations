@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Mathematicians.Web.Data
+namespace MergableMigrations.EF6.Loader
 {
-    public class LookaheadEnumerator<T>
+    class LookaheadEnumerator<T>
     {
         private IEnumerator<T> _enumerator;
         private bool _more;

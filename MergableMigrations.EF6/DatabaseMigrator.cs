@@ -1,4 +1,5 @@
-﻿using MergableMigrations.EF6;
+﻿using MergableMigrations.EF6.Loader;
+using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
 using Newtonsoft.Json;
 using System;
@@ -8,17 +9,19 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace Mathematicians.Web.Data
+namespace MergableMigrations.EF6
 {
-    public class Setup
+    public class DatabaseMigrator
     {
-        private const string DatabaseName = "Mathematicians";
+        private readonly string _databaseName;
+        private readonly string _fileName;
+        private readonly IMigrations _migrations;
 
-        private string _fileName;
-
-        public Setup(string fileName)
+        public DatabaseMigrator(string databaseName, string fileName, IMigrations migrations)
         {
+            _databaseName = databaseName;
             _fileName = fileName;
+            _migrations = migrations;
         }
 
         public void MigrateDatabase()
@@ -29,16 +32,16 @@ namespace Mathematicians.Web.Data
             {
                 string[] initialize =
                 {
-                    $@"CREATE DATABASE [{DatabaseName}]
-                        ON (NAME = '{DatabaseName}',
+                    $@"CREATE DATABASE [{_databaseName}]
+                        ON (NAME = '{_databaseName}',
                         FILENAME = '{_fileName}')",
-                    $@"CREATE TABLE [{DatabaseName}].[dbo].[__MergableMigrationHistory](
+                    $@"CREATE TABLE [{_databaseName}].[dbo].[__MergableMigrationHistory](
                         [MigrationId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
                         [Type] VARCHAR(50) NOT NULL,
                         [HashCode] VARBINARY(32) NOT NULL,
                         [Attributes] NVARCHAR(MAX) NOT NULL,
 	                    INDEX [IX_MergableMigration_HashCode] UNIQUE ([HashCode]))",
-                    $@"CREATE TABLE [{DatabaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] (
+                    $@"CREATE TABLE [{_databaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] (
 	                    [MigrationId] INT NOT NULL,
 	                    [Role] NVARCHAR(50) NOT NULL,
 	                    [PrerequisiteMigrationId] INT NOT NULL,
@@ -50,25 +53,25 @@ namespace Mathematicians.Web.Data
                 ExecuteSqlCommands(Master, initialize);
             }
 
-            var generator = new SqlGenerator(new Migrations(), migrationHistory);
+            var generator = new SqlGenerator(_migrations, migrationHistory);
 
             var sql = generator.Generate();
             ExecuteSqlCommands(Master, sql);
         }
 
-        private static MigrationHistory LoadMigrationHistory()
+        private MigrationHistory LoadMigrationHistory()
         {
             var ids = ExecuteSqlQuery(Master,
-                $"SELECT database_id FROM master.sys.databases WHERE name = '{DatabaseName}'",
+                $"SELECT database_id FROM master.sys.databases WHERE name = '{_databaseName}'",
                 row => (int)row["database_id"]);
             if (ids.Any())
             {
                 var rows = ExecuteSqlQuery(Master,
                     $@"SELECT h.[Type], h.[HashCode], h.[Attributes], j.[Role], p.[HashCode] AS [PrerequisiteHashCode]
-                        FROM [{DatabaseName}].[dbo].[__MergableMigrationHistory] h
-                        LEFT JOIN [{DatabaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] j
+                        FROM [{_databaseName}].[dbo].[__MergableMigrationHistory] h
+                        LEFT JOIN [{_databaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] j
                           ON h.MigrationId = j.MigrationId
-                        LEFT JOIN [{DatabaseName}].[dbo].[__MergableMigrationHistory] p
+                        LEFT JOIN [{_databaseName}].[dbo].[__MergableMigrationHistory] p
                           ON j.PrerequisiteMigrationId = p.MigrationId
                         ORDER BY h.MigrationId, j.Role, p.MigrationId",
                     row => new MigrationHistoryRow
@@ -165,14 +168,14 @@ namespace Mathematicians.Web.Data
         {
             var fileNames = ExecuteSqlQuery(Master, $@"
                 SELECT [physical_name] FROM [sys].[master_files]
-                WHERE [database_id] = DB_ID('{DatabaseName}')",
+                WHERE [database_id] = DB_ID('{_databaseName}')",
                 row => (string)row["physical_name"]);
 
             if (fileNames.Any())
             {
                 ExecuteSqlCommand(Master, $@"
-                    ALTER DATABASE [{DatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                    EXEC sp_detach_db '{DatabaseName}'");
+                    ALTER DATABASE [{_databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                    EXEC sp_detach_db '{_databaseName}'");
 
                 fileNames.ForEach(File.Delete);
             }
