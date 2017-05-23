@@ -1,24 +1,22 @@
-﻿using System;
-using MergableMigrations.Specification.Implementation;
+﻿using MergableMigrations.Specification.Implementation;
 
 namespace MergableMigrations.Specification
 {
     public class DatabaseSpecification
     {
-        private readonly CreateDatabaseMigration _parent;
-        private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
+        private readonly string _databaseName;
+        private readonly MigrationHistoryBuilder _migrationHistoryBuilder = new MigrationHistoryBuilder();
 
-        private string DatabaseName => _parent.DatabaseName;
+        public MigrationHistory MigrationHistory => _migrationHistoryBuilder.MigrationHistory;
 
-        internal DatabaseSpecification(CreateDatabaseMigration parent, MigrationHistoryBuilder migrationHistoryBuilder)
+        public DatabaseSpecification(string databaseName)
         {
-            _parent = parent;
-            _migrationHistoryBuilder = migrationHistoryBuilder;
+            _databaseName = databaseName;
         }
 
         public SchemaSpecification UseSchema(string schemaName)
         {
-            var migration = new UseSchemaMigration(_parent, schemaName);
+            var migration = new UseSchemaMigration(_databaseName, schemaName);
             _migrationHistoryBuilder.Append(migration);
             return new SchemaSpecification(migration, _migrationHistoryBuilder);
         }

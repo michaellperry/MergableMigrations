@@ -2,6 +2,6 @@
 {
     public interface IMigrations
     {
-        void AddMigrations(ModelSpecification model);
+        void AddMigrations(DatabaseSpecification databaseSpecification);
     }
 }

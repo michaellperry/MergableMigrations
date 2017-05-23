@@ -8,10 +8,8 @@ namespace Mathematicians
     // I created a second migrations class.
     public class MigrationsV2 : IMigrations
     {
-        public void AddMigrations(ModelSpecification model)
+        public void AddMigrations(DatabaseSpecification db)
         {
-            var db = model.CreateDatabase("Mathematicians");
-
             var dbo = db.UseSchema("dbo");
 
             var mathematician = DefineMathematician(dbo);

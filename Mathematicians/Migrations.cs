@@ -5,10 +5,8 @@ namespace Mathematicians
 {
     public class Migrations : IMigrations
     {
-        public void AddMigrations(ModelSpecification model)
+        public void AddMigrations(DatabaseSpecification db)
         {
-            var db = model.CreateDatabase("Mathematicians");
-
             var dbo = db.UseSchema("dbo");
 
             var mathematician = DefineMathematician(dbo);

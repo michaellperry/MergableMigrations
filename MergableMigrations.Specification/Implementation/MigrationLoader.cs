@@ -11,12 +11,9 @@ namespace MergableMigrations.Specification.Implementation
         {
             switch (memento.Type)
             {
-                case nameof(CreateDatabaseMigration):
-                    return new CreateDatabaseMigration(
-                        memento.Attributes["DatabaseName"]);
                 case nameof(UseSchemaMigration):
                     return new UseSchemaMigration(
-                        (CreateDatabaseMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
+                        memento.Attributes["DatabaseName"],
                         memento.Attributes["SchemaName"]);
                 case nameof(CreateTableMigration):
                     return new CreateTableMigration(

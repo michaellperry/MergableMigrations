@@ -15,7 +15,7 @@ namespace Mathematicians.UnitTests
             var migrations = new Migrations();
             var migrationHistory = new MigrationHistory();
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
-            var sql = sqlGenerator.Generate();
+            var sql = sqlGenerator.Generate("Mathematicians");
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
     [MathematicianId] INT NOT NULL,
@@ -41,18 +41,14 @@ namespace Mathematicians.UnitTests
         {
             var mementos = GivenMigrationMementos(new Migrations());
 
-            mementos.Length.Should().Be(9);
+            mementos.Length.Should().Be(8);
 
-            mementos[0].Type.Should().Be("CreateDatabaseMigration");
-            mementos[0].Attributes["DatabaseName"].Should().Be("Mathematicians");
+            mementos[0].Type.Should().Be("UseSchemaMigration");
+            mementos[0].Attributes["SchemaName"].Should().Be("dbo");
 
-            mementos[1].Type.Should().Be("UseSchemaMigration");
-            mementos[1].Attributes["SchemaName"].Should().Be("dbo");
+            mementos[1].Type.Should().Be("CreateTableMigration");
+            mementos[1].Attributes["TableName"].Should().Be("Mathematician");
             mementos[1].Prerequisites["Parent"].Should().Contain(mementos[0].HashCode);
-
-            mementos[2].Type.Should().Be("CreateTableMigration");
-            mementos[2].Attributes["TableName"].Should().Be("Mathematician");
-            mementos[2].Prerequisites["Parent"].Should().Contain(mementos[1].HashCode);
         }
 
         [Fact]
@@ -76,9 +72,9 @@ namespace Mathematicians.UnitTests
 
         private MigrationHistory GivenCompleteMigrationHistory(IMigrations migrations)
         {
-            var model = new ModelSpecification();
-            migrations.AddMigrations(model);
-            return model.MigrationHistory;
+            var databaseSpecification = new DatabaseSpecification("Mathematicians");
+            migrations.AddMigrations(databaseSpecification);
+            return databaseSpecification.MigrationHistory;
         }
 
         private MigrationHistory WhenLoadMigrationHistory(MigrationMemento[] mementos)
@@ -89,7 +85,7 @@ namespace Mathematicians.UnitTests
         private static string[] WhenGenerateSql(IMigrations migrations, MigrationHistory migrationHistory)
         {
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
-            return sqlGenerator.Generate();
+            return sqlGenerator.Generate("Mathematicians");
         }
     }
 }

@@ -20,11 +20,11 @@ namespace MergableMigrations.EF6
             _migrationHistory = migrationHistory;
         }
 
-        public string[] Generate()
+        public string[] Generate(string databaseName)
         {
-            var model = new ModelSpecification();
-            _migrations.AddMigrations(model);
-            var newMigrations = model.MigrationHistory;
+            var databaseSpecification = new DatabaseSpecification(databaseName);
+            _migrations.AddMigrations(databaseSpecification);
+            var newMigrations = databaseSpecification.MigrationHistory;
             var difference = newMigrations.Subtract(_migrationHistory);
 
             var sql = ImmutableList<string>.Empty;
@@ -36,9 +36,9 @@ namespace MergableMigrations.EF6
                 string[] result = difference.Head.GenerateSql(migrationsAffected);
                 sql = sql.AddRange(result);
                 var menentos = migrationsAffected.MigrationHistory.GetMementos().ToList();
-                sql = sql.Add(GenerateInsertStatement(model.DatabaseName, menentos));
+                sql = sql.Add(GenerateInsertStatement(databaseName, menentos));
                 if (menentos.SelectMany(m => m.Prerequisites).SelectMany(p => p.Value).Any())
-                    sql = sql.Add(GeneratePrerequisiteInsertStatements(model.DatabaseName, menentos));
+                    sql = sql.Add(GeneratePrerequisiteInsertStatements(databaseName, menentos));
                 difference = difference.Subtract(migrationsAffected.MigrationHistory);
             }
 

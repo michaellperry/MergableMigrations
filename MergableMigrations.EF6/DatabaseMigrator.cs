@@ -55,7 +55,7 @@ namespace MergableMigrations.EF6
 
             var generator = new SqlGenerator(_migrations, migrationHistory);
 
-            var sql = generator.Generate();
+            var sql = generator.Generate(_databaseName);
             ExecuteSqlCommands(Master, sql);
         }
 

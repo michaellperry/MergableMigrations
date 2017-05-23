@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
     class UseSchemaMigration : Migration
     {
-        private readonly CreateDatabaseMigration _parent;
+        private readonly string _databaseName;
         private readonly string _schemaName;
 
-        public string DatabaseName => _parent.DatabaseName;
+        public string DatabaseName => _databaseName;
         public string SchemaName => _schemaName;
 
-        public UseSchemaMigration(CreateDatabaseMigration parent, string schemaName)
+        public UseSchemaMigration(string databaseName, string schemaName)
         {
-            _parent = parent;
+            _databaseName = databaseName;
             _schemaName = schemaName;
         }
 
@@ -27,7 +26,6 @@ namespace MergableMigrations.Specification.Implementation
         protected override BigInteger ComputeSha256Hash()
         {
             return nameof(UseSchemaMigration).Sha256Hash().Concatenate(
-                _parent.Sha256Hash,
                 _schemaName.Sha256Hash());
         }
 
@@ -37,12 +35,12 @@ namespace MergableMigrations.Specification.Implementation
                 nameof(UseSchemaMigration),
                 new Dictionary<string, string>
                 {
+                    [nameof(DatabaseName)] = DatabaseName,
                     [nameof(SchemaName)] = SchemaName
                 },
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
                 });
         }
     }
