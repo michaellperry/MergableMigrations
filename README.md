@@ -2,44 +2,54 @@
 
 Partially ordered database migrations for .NET.
 
-Current status: **ideation**
+Current status: **Proof of Concept**
 
 You can't yet use this in production.
 
 ## What do migrations look like?
 
-Create a database and schema (or use `dbo`):
+Create a schema (or use `dbo`):
 
 ```csharp
-public void AddMigrations(ModelSpecification model)
+public void AddMigrations(DatabaseSpecification db)
 {
-    var db = model.CreateDatabase("Mathematicians");
-
     var dbo = db.UseSchema("dbo");
+
+    var mathematicianKey = DefineMathematician(dbo);
+
+    DefineContribution(dbo, mathematicianKey);
 }
 ```
 
 Create a table:
 
 ```csharp
-var table = dbo.CreateTable("Mathematician");
+private static PrimaryKeySpecification DefineMathematician(SchemaSpecification schema)
+{
+    var table = schema.CreateTable("Mathematician");
 
-var mathematicianId = table.CreateIntColumn("MathematicianId");
-var pk = table.CreatePrimaryKey(mathematicianId);
-var name = table.CreateStringColumn("Name", 100);
-var birthYear = table.CreateIntColumn("BirthYear");
-var deathYear = table.CreateIntColumn("DeathYear", nullable: true);
+    var mathematicianId = table.CreateIntColumn("MathematicianId");
+    var pk = table.CreatePrimaryKey(mathematicianId);
+    var name = table.CreateStringColumn("Name", 100);
+    var birthYear = table.CreateIntColumn("BirthYear");
+    var deathYear = table.CreateIntColumn("DeathYear", nullable: true);
+
+    return pk;
+}
 ```
 
 Create a foreign key:
 
 ```csharp
-var contribution = dbo.CreateTable("Contribution");
+private static void DefineContribution(SchemaSpecification schema, PrimaryKeySpecification mathematicianKey)
+{
+    var table = schema.CreateTable("Contribution");
 
-var contributionMathematicianId = contribution.CreateIntColumn("MathematicianId");
+    var mathematicianId = table.CreateIntColumn("MathematicianId");
 
-var indexMathematicianId = contribution.CreateIndex(contributionMathematicianId);
-var fkMathematician = indexMathematicianId.CreateForeignKey(pk);
+    var indexMathematicianId = table.CreateIndex(mathematicianId);
+    var fkMathematician = indexMathematicianId.CreateForeignKey(mathematicianKey);
+}
 ```
 
 Organize these migration steps to keep them nice and neat. Put them in functions. Group them in classes. The organization is up to you. They don't need to be put in sequential order.
@@ -47,17 +57,37 @@ Organize these migration steps to keep them nice and neat. Put them in functions
 If you make a mistake, do not delete a migration step! Instead, create a new migration. Rename a table or column:
 
 ```csharp
-var paper = contribution.RenameTable("Paper");
-var yearOfBirth = birthYear.RenameColumn("YearOfBirth");
+private static void DefineContribution(SchemaSpecification schema, PrimaryKeySpecification mathematicianKey)
+{
+    // ...
+
+    var paper = table.RenameTable("Paper");
+}
+
+private static PrimaryKeySpecification DefineMathematician(SchemaSpecification schema)
+{
+    // ...
+
+    var yearOfBirth = birthYear.RenameColumn("YearOfBirth");
+
+    // ...
+}
 ```
 
 Or drop a table or column:
 
 ```csharp
-deathDate.DropColumn();
+private static PrimaryKeySpecification DefineMathematician(SchemaSpecification schema)
+{
+    // ...
+
+    deathDate.DropColumn();
+
+    // ...
+}
 ```
 
-As long as you always add migrations, database deployment will be successful. To any environment. But if you delete one, then the tool will halt.
+As long as you always add migrations, database deployment will be successful. To any environment. In any order. But if you delete one, then the tool will halt.
 
 ## Why partially ordered?
 
