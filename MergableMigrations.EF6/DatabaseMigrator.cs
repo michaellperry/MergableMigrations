@@ -15,12 +15,14 @@ namespace MergableMigrations.EF6
     {
         private readonly string _databaseName;
         private readonly string _fileName;
+        private readonly string _masterConnectionString;
         private readonly IMigrations _migrations;
 
-        public DatabaseMigrator(string databaseName, string fileName, IMigrations migrations)
+        public DatabaseMigrator(string databaseName, string fileName, string masterConnectionString, IMigrations migrations)
         {
             _databaseName = databaseName;
             _fileName = fileName;
+            _masterConnectionString = masterConnectionString;
             _migrations = migrations;
         }
 
@@ -50,24 +52,39 @@ namespace MergableMigrations.EF6
 	                    INDEX [IX_MergableMigrationPrerequisite_PrerequisiteMigrationId] ([PrerequisiteMigrationId]),
 	                    FOREIGN KEY ([PrerequisiteMigrationId]) REFERENCES [Mathematicians].[dbo].[__MergableMigrationHistory])"
                 };
-                ExecuteSqlCommands(Master, initialize);
+                ExecuteSqlCommands(initialize);
             }
 
             var generator = new SqlGenerator(_migrations, migrationHistory);
 
             var sql = generator.Generate(_databaseName);
-            ExecuteSqlCommands(Master, sql);
+            ExecuteSqlCommands(sql);
+        }
+
+        public void DestroyDatabase()
+        {
+            var fileNames = ExecuteSqlQuery($@"
+                SELECT [physical_name] FROM [sys].[master_files]
+                WHERE [database_id] = DB_ID('{_databaseName}')",
+                row => (string)row["physical_name"]);
+
+            if (fileNames.Any())
+            {
+                ExecuteSqlCommand($@"
+                    ALTER DATABASE [{_databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                    EXEC sp_detach_db '{_databaseName}'");
+
+                fileNames.ForEach(File.Delete);
+            }
         }
 
         private MigrationHistory LoadMigrationHistory()
         {
-            var ids = ExecuteSqlQuery(Master,
-                $"SELECT database_id FROM master.sys.databases WHERE name = '{_databaseName}'",
+            var ids = ExecuteSqlQuery($"SELECT database_id FROM master.sys.databases WHERE name = '{_databaseName}'",
                 row => (int)row["database_id"]);
             if (ids.Any())
             {
-                var rows = ExecuteSqlQuery(Master,
-                    $@"SELECT h.[Type], h.[HashCode], h.[Attributes], j.[Role], p.[HashCode] AS [PrerequisiteHashCode]
+                var rows = ExecuteSqlQuery($@"SELECT h.[Type], h.[HashCode], h.[Attributes], j.[Role], p.[HashCode] AS [PrerequisiteHashCode]
                         FROM [{_databaseName}].[dbo].[__MergableMigrationHistory] h
                         LEFT JOIN [{_databaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] j
                           ON h.MigrationId = j.MigrationId
@@ -164,28 +181,9 @@ namespace MergableMigrations.EF6
                 return new BigInteger(((byte[])value).Reverse().ToArray());
         }
 
-        public void DestroyDatabase()
+        private void ExecuteSqlCommand(string commandText)
         {
-            var fileNames = ExecuteSqlQuery(Master, $@"
-                SELECT [physical_name] FROM [sys].[master_files]
-                WHERE [database_id] = DB_ID('{_databaseName}')",
-                row => (string)row["physical_name"]);
-
-            if (fileNames.Any())
-            {
-                ExecuteSqlCommand(Master, $@"
-                    ALTER DATABASE [{_databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                    EXEC sp_detach_db '{_databaseName}'");
-
-                fileNames.ForEach(File.Delete);
-            }
-        }
-
-        private static void ExecuteSqlCommand(
-            SqlConnectionStringBuilder connectionStringBuilder,
-            string commandText)
-        {
-            using (var connection = new SqlConnection(connectionStringBuilder.ConnectionString))
+            using (var connection = new SqlConnection(_masterConnectionString))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
@@ -196,13 +194,11 @@ namespace MergableMigrations.EF6
             }
         }
 
-        private static void ExecuteSqlCommands(
-            SqlConnectionStringBuilder connectionStringBuilder,
-            IEnumerable<string> commands)
+        private void ExecuteSqlCommands(IEnumerable<string> commands)
         {
             if (commands.Any())
             {
-                using (var connection = new SqlConnection(connectionStringBuilder.ConnectionString))
+                using (var connection = new SqlConnection(_masterConnectionString))
                 {
                     connection.Open();
                     foreach (var commandText in commands)
@@ -217,13 +213,12 @@ namespace MergableMigrations.EF6
             }
         }
 
-        private static List<T> ExecuteSqlQuery<T>(
-            SqlConnectionStringBuilder connectionStringBuilder,
+        private List<T> ExecuteSqlQuery<T>(
             string queryText,
             Func<SqlDataReader, T> read)
         {
             var result = new List<T>();
-            using (var connection = new SqlConnection(connectionStringBuilder.ConnectionString))
+            using (var connection = new SqlConnection(_masterConnectionString))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
@@ -240,13 +235,5 @@ namespace MergableMigrations.EF6
             }
             return result;
         }
-
-        private static SqlConnectionStringBuilder Master =>
-            new SqlConnectionStringBuilder
-            {
-                DataSource = @"(LocalDB)\MSSQLLocalDB",
-                InitialCatalog = "master",
-                IntegratedSecurity = true
-            };
     }
 }

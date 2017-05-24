@@ -14,7 +14,7 @@ namespace Mathematicians.Web
     {
         protected void Application_Start()
         {
-            DatabaseConfig.Configure(Server.MapPath("~/App_Data/Mathematicians.mdf"));
+            DatabaseConfig.Configure(Server);
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
