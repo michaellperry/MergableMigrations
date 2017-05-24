@@ -40,6 +40,7 @@ namespace MergableMigrations.Specification
             var childMigration = new PrimaryKeyMigration(
                 _migration,
                 columns.Select(c => c.Migration));
+            _migration.AddPrimaryKey(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
             return new PrimaryKeySpecification();
         }

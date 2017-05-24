@@ -20,11 +20,13 @@ namespace Mathematicians.UnitTests
     [MathematicianId] INT NOT NULL,
     [Name] NVARCHAR(100) NOT NULL,
     [BirthYear] INT NOT NULL,
-    [DeathYear] INT NULL)");
+    [DeathYear] INT NULL,
+    CONSTRAINT [PK_Mathematician] PRIMARY KEY CLUSTERED ([MathematicianId]))");
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
     [ContributionId] INT NOT NULL,
     [MathematicianId] INT NOT NULL,
-    [Description] NVARCHAR(500) NOT NULL)");
+    [Description] NVARCHAR(500) NOT NULL,
+    CONSTRAINT [PK_Contribution] PRIMARY KEY CLUSTERED ([ContributionId]))");
         }
 
         [Fact]
@@ -59,7 +61,8 @@ namespace Mathematicians.UnitTests
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Field](
     [FieldId] INT NOT NULL,
-    [Name] NVARCHAR(20) NOT NULL)");
+    [Name] NVARCHAR(20) NOT NULL,
+    CONSTRAINT [PK_Field] PRIMARY KEY CLUSTERED ([FieldId]))");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
     ADD [FieldId] INT NOT NULL");
         }

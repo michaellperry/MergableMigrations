@@ -14,6 +14,7 @@ namespace MergableMigrations.Specification.Implementation
         public string DatabaseName => _parent.DatabaseName;
         public string SchemaName => _parent.SchemaName;
         public string TableName => _parent.TableName;
+        public IEnumerable<CreateColumnMigration> Columns => _columns;
 
         public PrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {
