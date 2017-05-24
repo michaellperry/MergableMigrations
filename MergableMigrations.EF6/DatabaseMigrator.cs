@@ -112,7 +112,8 @@ namespace MergableMigrations.EF6
             IEnumerable<MigrationHistoryRow> rows)
         {
             var enumerator = new LookaheadEnumerator<MigrationHistoryRow>(rows.GetEnumerator());
-            if (enumerator.MoveNext())
+            enumerator.MoveNext();
+            if (enumerator.More)
             {
                 do
                 {
@@ -162,7 +163,8 @@ namespace MergableMigrations.EF6
             do
             {
                 yield return enumerator.Current.PrerequisiteHashCode;
-            } while (enumerator.MoveNext() && enumerator.Current.HashCode == hashCode && enumerator.Current.Role == role);
+                enumerator.MoveNext();
+            } while (enumerator.More && enumerator.Current.HashCode == hashCode && enumerator.Current.Role == role);
         }
 
         private static string LoadString(object value)

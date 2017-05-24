@@ -15,10 +15,9 @@ namespace MergableMigrations.EF6.Loader
         public T Current => _enumerator.Current;
         public bool More => _more;
 
-        public bool MoveNext()
+        public void MoveNext()
         {
             _more = _enumerator.MoveNext();
-            return _more;
         }
     }
 }
