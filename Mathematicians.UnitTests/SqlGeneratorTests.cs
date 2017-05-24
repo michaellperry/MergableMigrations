@@ -18,11 +18,13 @@ namespace Mathematicians.UnitTests
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
     [MathematicianId] INT NOT NULL,
+    [Name] NVARCHAR(100) NOT NULL,
     [BirthYear] INT NOT NULL,
     [DeathYear] INT NULL)");
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
     [ContributionId] INT NOT NULL,
-    [MathematicianId] INT NOT NULL)");
+    [MathematicianId] INT NOT NULL,
+    [Description] NVARCHAR(500) NOT NULL)");
         }
 
         [Fact]
@@ -40,7 +42,7 @@ namespace Mathematicians.UnitTests
         {
             var mementos = GivenMigrationMementos(new Migrations());
 
-            mementos.Length.Should().Be(8);
+            mementos.Length.Should().Be(10);
 
             mementos[0].Type.Should().Be("UseSchemaMigration");
             mementos[0].Attributes["SchemaName"].Should().Be("dbo");
@@ -58,7 +60,8 @@ namespace Mathematicians.UnitTests
             var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Field](
-    [FieldId] INT NOT NULL)");
+    [FieldId] INT NOT NULL,
+    [Name] NVARCHAR(20) NOT NULL)");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
     ADD [FieldId] INT NOT NULL");
         }

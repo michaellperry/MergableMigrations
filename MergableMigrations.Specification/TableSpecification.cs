@@ -24,8 +24,13 @@ namespace MergableMigrations.Specification
             return new ColumnSpecification();
         }
 
-        public ColumnSpecification CreateStringColumn(string name, int length, bool nullable = false)
+        public ColumnSpecification CreateStringColumn(string columnName, int length, bool nullable = false)
         {
+            var childMigration = new CreateColumnMigration(
+                _migration,
+                columnName, $"NVARCHAR({length}) {(nullable ? "NULL" : "NOT NULL")}");
+            _migration.AddColumn(childMigration);
+            _migrationHistoryBuilder.Append(childMigration);
             return new ColumnSpecification();
         }
 
