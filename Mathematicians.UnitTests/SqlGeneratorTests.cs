@@ -42,8 +42,6 @@ namespace Mathematicians.UnitTests
         {
             var mementos = GivenMigrationMementos(new Migrations());
 
-            mementos.Length.Should().Be(10);
-
             mementos[0].Type.Should().Be("UseSchemaMigration");
             mementos[0].Attributes["SchemaName"].Should().Be("dbo");
 

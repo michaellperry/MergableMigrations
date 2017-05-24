@@ -3,6 +3,7 @@ using MergableMigrations.Specification.Implementation;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
+using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification
 {
@@ -57,6 +58,14 @@ namespace MergableMigrations.Specification
                 {
                     ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
                 });
+        }
+
+        public static CreateColumnMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
+        {
+            return new CreateColumnMigration(
+                (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
+                memento.Attributes["ColumnName"],
+                memento.Attributes["TypeDescriptor"]);
         }
     }
 }

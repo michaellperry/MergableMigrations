@@ -43,5 +43,12 @@ namespace MergableMigrations.Specification.Implementation
                 {
                 });
         }
+
+        public static UseSchemaMigration FromMemento(MigrationMemento memento)
+        {
+            return new UseSchemaMigration(
+                memento.Attributes["DatabaseName"],
+                memento.Attributes["SchemaName"]);
+        }
     }
 }

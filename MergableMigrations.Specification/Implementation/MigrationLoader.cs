@@ -12,18 +12,13 @@ namespace MergableMigrations.Specification.Implementation
             switch (memento.Type)
             {
                 case nameof(UseSchemaMigration):
-                    return new UseSchemaMigration(
-                        memento.Attributes["DatabaseName"],
-                        memento.Attributes["SchemaName"]);
+                    return UseSchemaMigration.FromMemento(memento);
                 case nameof(CreateTableMigration):
-                    return new CreateTableMigration(
-                        (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
-                        memento.Attributes["TableName"]);
+                    return CreateTableMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateColumnMigration):
-                    return new CreateColumnMigration(
-                        (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
-                        memento.Attributes["ColumnName"],
-                        memento.Attributes["TypeDescriptor"]);
+                    return CreateColumnMigration.FromMemento(memento, migrationsByHashCode);
+                case nameof(PrimaryKeyMigration):
+                    return PrimaryKeyMigration.FromMemento(memento, migrationsByHashCode);
                 default:
                     throw new ArgumentException($"Unknown type {memento.Type}");
             }

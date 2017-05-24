@@ -1,5 +1,6 @@
 ﻿using System;
 using MergableMigrations.Specification.Implementation;
+using System.Linq;
 
 namespace MergableMigrations.Specification
 {
@@ -21,7 +22,7 @@ namespace MergableMigrations.Specification
                 columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}");
             _migration.AddColumn(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
-            return new ColumnSpecification();
+            return new ColumnSpecification(childMigration);
         }
 
         public ColumnSpecification CreateStringColumn(string columnName, int length, bool nullable = false)
@@ -31,11 +32,15 @@ namespace MergableMigrations.Specification
                 columnName, $"NVARCHAR({length}) {(nullable ? "NULL" : "NOT NULL")}");
             _migration.AddColumn(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
-            return new ColumnSpecification();
+            return new ColumnSpecification(childMigration);
         }
 
         public PrimaryKeySpecification CreatePrimaryKey(params ColumnSpecification[] columns)
         {
+            var childMigration = new PrimaryKeyMigration(
+                _migration,
+                columns.Select(c => c.Migration));
+            _migrationHistoryBuilder.Append(childMigration);
             return new PrimaryKeySpecification();
         }
 

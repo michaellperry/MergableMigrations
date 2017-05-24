@@ -77,5 +77,12 @@ namespace MergableMigrations.Specification.Implementation
                     ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
                 });
         }
+
+        public static CreateTableMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
+        {
+            return new CreateTableMigration(
+                (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
+                memento.Attributes["TableName"]);
+        }
     }
 }

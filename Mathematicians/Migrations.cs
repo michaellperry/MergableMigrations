@@ -32,6 +32,7 @@ namespace Mathematicians
             var table = schema.CreateTable("Contribution");
 
             var contributionId = table.CreateIntColumn("ContributionId");
+            var pk = table.CreatePrimaryKey(contributionId);
             var mathematicianId = table.CreateIntColumn("MathematicianId");
             var description = table.CreateStringColumn("Description", 500);
 
