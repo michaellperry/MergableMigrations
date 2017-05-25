@@ -27,7 +27,9 @@ namespace Mathematicians.UnitTests
     CONSTRAINT [PK_Contribution] PRIMARY KEY CLUSTERED ([ContributionId]),
     [MathematicianId] INT NOT NULL,
     [Description] NVARCHAR(500) NOT NULL,
-    INDEX [IX_Contribution_MathematicianId] NONCLUSTERED ([MathematicianId]))");
+    INDEX [IX_Contribution_MathematicianId] NONCLUSTERED ([MathematicianId]),
+    CONSTRAINT [FK_Contribution_MathematicianId] FOREIGN KEY ([MathematicianId])
+        REFERENCES [Mathematicians].[dbo].[Mathematician] ([MathematicianId]))");
         }
 
         [Fact]

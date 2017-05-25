@@ -1,6 +1,29 @@
-﻿namespace MergableMigrations.Specification
+﻿using MergableMigrations.Specification.Implementation;
+
+namespace MergableMigrations.Specification
 {
-    public class UniqueIndexSpecification : IndexSpecification
+    public class UniqueIndexSpecification
     {
+        private CreateUniqueIndexMigration _migration;
+        private MigrationHistoryBuilder _migrationHistoryBuilder;
+
+        internal CreateUniqueIndexMigration Migration => _migration;
+
+        internal UniqueIndexSpecification(CreateUniqueIndexMigration migration, MigrationHistoryBuilder migrationHistoryBuilder)
+        {
+            _migration = migration;
+            _migrationHistoryBuilder = migrationHistoryBuilder;
+        }
+
+        public ForeignKeySpecification CreateForeignKey(PrimaryKeySpecification referencing, bool cascadeDelete = false, bool cascadeUpdate = false)
+        {
+            var childMigration = new CreateForeignKeyMigration(
+                _migration,
+                referencing.Migration,
+                cascadeDelete,
+                cascadeUpdate);
+            _migrationHistoryBuilder.Append(childMigration);
+            return new ForeignKeySpecification();
+        }
     }
 }

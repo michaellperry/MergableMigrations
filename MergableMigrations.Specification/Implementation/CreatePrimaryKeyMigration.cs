@@ -5,15 +5,15 @@ using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
-    class CreatePrimaryKeyMigration : TableDefinitionMigration
+    class CreatePrimaryKeyMigration : IndexMigration
     {
         private readonly CreateTableMigration _parent;
         private readonly ImmutableList<CreateColumnMigration> _columns;
 
-        public string DatabaseName => _parent.DatabaseName;
-        public string SchemaName => _parent.SchemaName;
-        public string TableName => _parent.TableName;
-        public IEnumerable<CreateColumnMigration> Columns => _columns;
+        public override string DatabaseName => _parent.DatabaseName;
+        public override string SchemaName => _parent.SchemaName;
+        public override string TableName => _parent.TableName;
+        public override IEnumerable<CreateColumnMigration> Columns => _columns;
 
         public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {

@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
-    class CreateIndexMigration : TableDefinitionMigration
+    class CreateIndexMigration : IndexMigration
     {
         private readonly CreateTableMigration _parent;
         private readonly ImmutableList<CreateColumnMigration> _columns;
 
-        public string DatabaseName => _parent.DatabaseName;
-        public string SchemaName => _parent.SchemaName;
-        public string TableName => _parent.TableName;
-        public IEnumerable<CreateColumnMigration> Columns => _columns;
+        public override string DatabaseName => _parent.DatabaseName;
+        public override string SchemaName => _parent.SchemaName;
+        public override string TableName => _parent.TableName;
+        public override IEnumerable<CreateColumnMigration> Columns => _columns;
 
         public CreateIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {
@@ -21,13 +22,18 @@ namespace MergableMigrations.Specification.Implementation
             _columns = columns.ToImmutableList();
         }
 
+        internal void AddDefinition(CreateForeignKeyMigration childMigration)
+        {
+            _parent.AddDefinition(childMigration);
+        }
+
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string indexTail = string.Join("_", _columns.Select(c => $"{c.ColumnName}").ToArray());
-            string columnList = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string columnList = string.Join(", ", Columns.Select(c => $"[{c.ColumnName}]").ToArray());
             string[] sql =
             {
-                $"CREATE NONCLUSTERED INDEX [IX_{TableName}_{indexTail}] ON [{DatabaseName}].[dbo].[{TableName}] ({columnList})"
+                $"CREATE NONCLUSTERED INDEX [IX_{TableName}_{indexTail}] ON [{DatabaseName}].[{SchemaName}].[{TableName}] ({columnList})"
             };
 
             return sql;

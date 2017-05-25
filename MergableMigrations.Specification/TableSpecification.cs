@@ -1,5 +1,4 @@
-﻿using System;
-using MergableMigrations.Specification.Implementation;
+﻿using MergableMigrations.Specification.Implementation;
 using System.Linq;
 
 namespace MergableMigrations.Specification
@@ -42,7 +41,7 @@ namespace MergableMigrations.Specification
                 columns.Select(c => c.Migration));
             _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
-            return new PrimaryKeySpecification();
+            return new PrimaryKeySpecification(childMigration, _migrationHistoryBuilder);
         }
 
         public UniqueIndexSpecification CreateUniqueIndex(params ColumnSpecification[] columns)
@@ -52,7 +51,7 @@ namespace MergableMigrations.Specification
                 columns.Select(c => c.Migration));
             _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
-            return new UniqueIndexSpecification();
+            return new UniqueIndexSpecification(childMigration, _migrationHistoryBuilder);
         }
 
         public IndexSpecification CreateIndex(params ColumnSpecification[] columns)
@@ -62,7 +61,7 @@ namespace MergableMigrations.Specification
                 columns.Select(c => c.Migration));
             _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
-            return new IndexSpecification();
+            return new IndexSpecification(childMigration, _migrationHistoryBuilder);
         }
     }
 }

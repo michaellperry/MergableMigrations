@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
@@ -23,6 +22,8 @@ namespace MergableMigrations.Specification.Implementation
                     return CreateUniqueIndexMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateIndexMigration):
                     return CreateIndexMigration.FromMemento(memento, migrationsByHashCode);
+                case nameof(CreateForeignKeyMigration):
+                    return CreateForeignKeyMigration.FromMemento(memento, migrationsByHashCode);
                 default:
                     throw new ArgumentException($"Unknown type {memento.Type}");
             }
