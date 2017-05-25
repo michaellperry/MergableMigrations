@@ -2,6 +2,7 @@
 using MergableMigrations.EF6;
 using MergableMigrations.Specification;
 using MergableMigrations.Specification.Implementation;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -67,6 +68,26 @@ namespace Mathematicians.UnitTests
     [Name] NVARCHAR(20) NOT NULL)");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
     ADD [FieldId] INT NOT NULL");
+        }
+
+        [Fact]
+        public void ThrowsWhenDowngradingToAPreviousVersion()
+        {
+            var laterVersion = GivenMigrationMementos(new MigrationsV2());
+            var migrationHistory = WhenLoadMigrationHistory(laterVersion);
+
+            Action generateSql = () => WhenGenerateSql(new Migrations(), migrationHistory);
+            generateSql.ShouldThrow<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void ThrowsWhenMovingSideways()
+        {
+            var laterVersion = GivenMigrationMementos(new MigrationsV2());
+            var migrationHistory = WhenLoadMigrationHistory(laterVersion);
+
+            Action generateSql = () => WhenGenerateSql(new MigrationsV3(), migrationHistory);
+            generateSql.ShouldThrow<InvalidOperationException>();
         }
 
         private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)

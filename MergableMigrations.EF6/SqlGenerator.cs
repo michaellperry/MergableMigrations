@@ -25,6 +25,10 @@ namespace MergableMigrations.EF6
             var databaseSpecification = new DatabaseSpecification(databaseName);
             _migrations.AddMigrations(databaseSpecification);
             var newMigrations = databaseSpecification.MigrationHistory;
+            var ahead = _migrationHistory.Subtract(newMigrations);
+            if (ahead.Any)
+                throw new InvalidOperationException(
+                    "The target database is ahead of the desired migration. You can force a rollback, which may destroy data.");
             var difference = newMigrations.Subtract(_migrationHistory);
 
             var sql = ImmutableList<string>.Empty;
