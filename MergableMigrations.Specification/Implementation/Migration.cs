@@ -38,5 +38,7 @@ namespace MergableMigrations.Specification.Implementation
         {
             return BitConverter.ToInt32(Sha256Hash.ToByteArray(), 0);
         }
+
+        public abstract string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
@@ -21,6 +22,11 @@ namespace MergableMigrations.Specification.Implementation
         {
             string[] sql = { };
             return sql;
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            throw new NotImplementedException();
         }
 
         protected override BigInteger ComputeSha256Hash()

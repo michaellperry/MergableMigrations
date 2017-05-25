@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -38,6 +39,18 @@ namespace MergableMigrations.Specification.Implementation
                 $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
     ADD CONSTRAINT [FK_{TableName}_{indexTail}] FOREIGN KEY ({columnList})
         REFERENCES [{_referencing.DatabaseName}].[{_referencing.SchemaName}].[{_referencing.TableName}] ({referenceColumnList}){onDelete}{onUpdate}"
+            };
+
+            return sql;
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+
+            string[] sql =
+            {
+                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    DROP CONSTRAINT [FK_{TableName}_{indexTail}]"
             };
 
             return sql;

@@ -22,9 +22,7 @@ namespace MergableMigrations.EF6
 
         public string[] Generate(string databaseName)
         {
-            var databaseSpecification = new DatabaseSpecification(databaseName);
-            _migrations.AddMigrations(databaseSpecification);
-            var newMigrations = databaseSpecification.MigrationHistory;
+            var newMigrations = GetMigrationHistory(databaseName);
             var ahead = _migrationHistory.Subtract(newMigrations);
             if (ahead.Any)
                 throw new InvalidOperationException(
@@ -39,14 +37,42 @@ namespace MergableMigrations.EF6
                 migrationsAffected.Append(difference.Head);
                 string[] result = difference.Head.GenerateSql(migrationsAffected);
                 sql = sql.AddRange(result);
-                var menentos = migrationsAffected.MigrationHistory.GetMementos().ToList();
-                sql = sql.Add(GenerateInsertStatement(databaseName, menentos));
-                if (menentos.SelectMany(m => m.Prerequisites).SelectMany(p => p.Value).Any())
-                    sql = sql.Add(GeneratePrerequisiteInsertStatements(databaseName, menentos));
+                var mementos = migrationsAffected.MigrationHistory.GetMementos().ToList();
+                sql = sql.Add(GenerateInsertStatement(databaseName, mementos));
+                if (mementos.SelectMany(m => m.Prerequisites).SelectMany(p => p.Value).Any())
+                    sql = sql.Add(GeneratePrerequisiteInsertStatements(databaseName, mementos));
                 difference = difference.Subtract(migrationsAffected.MigrationHistory);
             }
 
             return sql.ToArray();
+        }
+
+        public string[] GenerateRollbackSql(string databaseName)
+        {
+            var newMigrations = GetMigrationHistory(databaseName);
+            var ahead = _migrationHistory.Subtract(newMigrations);
+
+            var sql = ImmutableList<string>.Empty;
+
+            while (ahead.Any)
+            {
+                var migrationsAffected = new MigrationHistoryBuilder();
+                migrationsAffected.Append(ahead.Head);
+                string[] result = ahead.Head.GenerateRollbackSql(migrationsAffected);
+                sql = sql.AddRange(result);
+                var mementos = migrationsAffected.MigrationHistory.GetMementos().ToList();
+                sql = sql.AddRange(GenerateDeleteStatements(databaseName, mementos));
+                ahead = ahead.Subtract(migrationsAffected.MigrationHistory);
+            }
+
+            return sql.ToArray();
+        }
+
+        private MigrationHistory GetMigrationHistory(string databaseName)
+        {
+            var databaseSpecification = new DatabaseSpecification(databaseName);
+            _migrations.AddMigrations(databaseSpecification);
+            return databaseSpecification.MigrationHistory;
         }
 
         private string GenerateInsertStatement(string databaseName, IEnumerable<MigrationMemento> migrations)
@@ -87,6 +113,22 @@ SELECT m.MigrationId, '{role}', p.MigrationId
 FROM [{databaseName}].[dbo].[__MergableMigrationHistory] m,
      [{databaseName}].[dbo].[__MergableMigrationHistory] p
 WHERE m.HashCode = 0x{migrationHashCode.ToString("X")} AND p.HashCode = 0x{prerequisiteHashCode.ToString("X")}";
+        }
+
+        private string[] GenerateDeleteStatements(string databaseName, IEnumerable<MigrationMemento> migrations)
+        {
+            var hashCodes = string.Join(", ", migrations.Select(m => $"0x{m.HashCode.ToString("X")}"));
+            string[] sql =
+            {
+                $@"DELETE p
+FROM [{databaseName}].[dbo].[__MergableMigrationHistory] m
+JOIN [{databaseName}].[dbo].[__MergableMigrationHistory] p
+  ON p.MigrationId = m.MigrationId
+WHERE h.HashCode IN ({hashCodes})",
+                $@"DELETE FROM [{databaseName}].[dbo].[__MergableMigrationHistory]
+WHERE HashCode IN ({hashCodes})"
+            };
+            return sql;
         }
     }
 }

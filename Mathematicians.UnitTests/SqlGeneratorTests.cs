@@ -83,11 +83,23 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void ThrowsWhenMovingSideways()
         {
-            var laterVersion = GivenMigrationMementos(new MigrationsV2());
+            var laterVersion = GivenMigrationMementos(new Migrations());
             var migrationHistory = WhenLoadMigrationHistory(laterVersion);
 
             Action generateSql = () => WhenGenerateSql(new MigrationsV3(), migrationHistory);
             generateSql.ShouldThrow<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void CanGenerateRollbackScript()
+        {
+            var previousVersion = GivenMigrationMementos(new MigrationsV2());
+            var migrationHistory = WhenLoadMigrationHistory(previousVersion);
+            var sql = WhenGenerateRollbackSql(new Migrations(), migrationHistory);
+
+            sql.Should().Contain(@"DROP TABLE [Mathematicians].[dbo].[Field]");
+            sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
+    DROP COLUMN [FieldId]");
         }
 
         private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)
@@ -112,6 +124,12 @@ namespace Mathematicians.UnitTests
         {
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
             return sqlGenerator.Generate("Mathematicians");
+        }
+
+        private static string[] WhenGenerateRollbackSql(IMigrations migrations, MigrationHistory migrationHistory)
+        {
+            var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
+            return sqlGenerator.GenerateRollbackSql("Mathematicians");
         }
     }
 }

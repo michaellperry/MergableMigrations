@@ -36,6 +36,16 @@ namespace MergableMigrations.Specification
             return sql;
         }
 
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            string[] sql =
+            {
+                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    DROP COLUMN [{ColumnName}]"
+            };
+
+            return sql;
+        }
+
         internal override string GenerateDefinitionSql()
         {
             return $"\r\n    [{ColumnName}] {TypeDescriptor}";

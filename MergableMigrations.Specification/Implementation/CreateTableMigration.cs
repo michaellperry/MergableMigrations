@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -45,6 +46,17 @@ namespace MergableMigrations.Specification.Implementation
             string[] sql =
             {
                 createTable
+            };
+            migrationsAffected.AppendAll(_definitions);
+
+            return sql;
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            string[] sql =
+            {
+                $"DROP TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]"
             };
             migrationsAffected.AppendAll(_definitions);
 

@@ -39,6 +39,17 @@ namespace MergableMigrations.Specification.Implementation
             return sql;
         }
 
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string[] sql =
+            {
+                $"DROP INDEX [IX_{TableName}_{indexTail}]"
+            };
+
+            return sql;
+        }
+
         internal override string GenerateDefinitionSql()
         {
             string indexTail = string.Join("_", _columns.Select(c => $"{c.ColumnName}").ToArray());

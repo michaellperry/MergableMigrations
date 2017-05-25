@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -31,6 +32,11 @@ namespace MergableMigrations.Specification.Implementation
             };
 
             return sql;
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            throw new NotImplementedException();
         }
 
         internal override string GenerateDefinitionSql()

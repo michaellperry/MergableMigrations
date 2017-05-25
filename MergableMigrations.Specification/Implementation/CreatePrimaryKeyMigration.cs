@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -27,6 +28,16 @@ namespace MergableMigrations.Specification.Implementation
             string[] sql =
             {
                 $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    ADD CONSTRAINT [PK_{TableName}] PRIMARY KEY CLUSTERED ({columnNames})"
+            };
+
+            return sql;
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        {
+            string[] sql =
+            {
+                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    DROP CONSTRAINT [PK_{TableName}]"
             };
 
             return sql;
