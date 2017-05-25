@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification
 {
-    class CreateColumnMigration : Migration
+    class CreateColumnMigration : TableDefinitionMigration
     {
         private readonly CreateTableMigration _parent;
         private readonly string _columnName;
@@ -34,6 +34,11 @@ namespace MergableMigrations.Specification
             };
 
             return sql;
+        }
+
+        internal override string GenerateDefinitionSql()
+        {
+            return $"\r\n    [{ColumnName}] {TypeDescriptor}";
         }
 
         protected override BigInteger ComputeSha256Hash()

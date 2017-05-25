@@ -20,7 +20,7 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}");
-            _migration.AddColumn(childMigration);
+            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
             return new ColumnSpecification(childMigration);
         }
@@ -30,24 +30,29 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, $"NVARCHAR({length}) {(nullable ? "NULL" : "NOT NULL")}");
-            _migration.AddColumn(childMigration);
+            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
             return new ColumnSpecification(childMigration);
         }
 
         public PrimaryKeySpecification CreatePrimaryKey(params ColumnSpecification[] columns)
         {
-            var childMigration = new PrimaryKeyMigration(
+            var childMigration = new CreatePrimaryKeyMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migration.AddPrimaryKey(childMigration);
+            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
             return new PrimaryKeySpecification();
         }
 
         public UniqueIndexSpecification CreateUniqueIndex(params ColumnSpecification[] columns)
         {
-            throw new NotImplementedException();
+            var childMigration = new CreateUniqueIndexMigration(
+                _migration,
+                columns.Select(c => c.Migration));
+            _migration.AddDefinition(childMigration);
+            _migrationHistoryBuilder.Append(childMigration);
+            return new UniqueIndexSpecification();
         }
 
         public IndexSpecification CreateIndex(params ColumnSpecification[] columns)

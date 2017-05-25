@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
-    class PrimaryKeyMigration : Migration
+    class CreatePrimaryKeyMigration : TableDefinitionMigration
     {
         private readonly CreateTableMigration _parent;
         private readonly ImmutableList<CreateColumnMigration> _columns;
@@ -16,7 +15,7 @@ namespace MergableMigrations.Specification.Implementation
         public string TableName => _parent.TableName;
         public IEnumerable<CreateColumnMigration> Columns => _columns;
 
-        public PrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
+        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
@@ -33,9 +32,16 @@ namespace MergableMigrations.Specification.Implementation
             return sql;
         }
 
+        internal override string GenerateDefinitionSql()
+        {
+            string columnNames = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+
+            return $"\r\n    CONSTRAINT [PK_{TableName}] PRIMARY KEY CLUSTERED ({columnNames})";
+        }
+
         protected override BigInteger ComputeSha256Hash()
         {
-            return nameof(PrimaryKeyMigration).Sha256Hash().Concatenate(
+            return nameof(CreatePrimaryKeyMigration).Sha256Hash().Concatenate(
                 Enumerable.Repeat(_parent.Sha256Hash, 1)
                     .Concat(_columns.Select(c => c.Sha256Hash))
                     .ToArray());
@@ -44,7 +50,7 @@ namespace MergableMigrations.Specification.Implementation
         internal override MigrationMemento GetMemento()
         {
             return new MigrationMemento(
-                nameof(PrimaryKeyMigration),
+                nameof(CreatePrimaryKeyMigration),
                 new Dictionary<string, string>
                 {
                 },
@@ -56,9 +62,9 @@ namespace MergableMigrations.Specification.Implementation
                 });
         }
 
-        public static PrimaryKeyMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
+        public static CreatePrimaryKeyMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
-            return new PrimaryKeyMigration(
+            return new CreatePrimaryKeyMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>());
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -11,10 +10,8 @@ namespace MergableMigrations.Specification.Implementation
         private readonly UseSchemaMigration _parent;
         private readonly string _tableName;
 
-        private ImmutableList<CreateColumnMigration> _columns =
-            ImmutableList<CreateColumnMigration>.Empty;
-        private ImmutableList<PrimaryKeyMigration> _primaryKeys =
-            ImmutableList<PrimaryKeyMigration>.Empty;
+        private ImmutableList<TableDefinitionMigration> _definitions =
+            ImmutableList<TableDefinitionMigration>.Empty;
 
         public string DatabaseName => _parent.DatabaseName;
         public string SchemaName => _parent.SchemaName;
@@ -26,24 +23,18 @@ namespace MergableMigrations.Specification.Implementation
             _tableName = tableName;
         }
 
-        internal void AddColumn(CreateColumnMigration childMigration)
+        internal void AddDefinition(TableDefinitionMigration childMigration)
         {
-            _columns = _columns.Add(childMigration);
-        }
-
-        internal void AddPrimaryKey(PrimaryKeyMigration childMigration)
-        {
-            _primaryKeys = _primaryKeys.Add(childMigration);
+            _definitions = _definitions.Add(childMigration);
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
             string createTable;
             string head = $"CREATE TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]";
-            if (_columns.Any())
+            if (_definitions.Any())
             {
-                var definitions = _columns.Select(GenerateColumnSql)
-                    .Concat(_primaryKeys.Select(GeneratePrimaryKeySql));
+                var definitions = _definitions.Select(d => d.GenerateDefinitionSql());
                 createTable = $"{head}({string.Join(",", definitions)})";
             }
             else
@@ -55,22 +46,9 @@ namespace MergableMigrations.Specification.Implementation
             {
                 createTable
             };
-            migrationsAffected.AppendAll(_columns);
-            migrationsAffected.AppendAll(_primaryKeys);
+            migrationsAffected.AppendAll(_definitions);
 
             return sql;
-        }
-
-        private string GenerateColumnSql(CreateColumnMigration column)
-        {
-            return $"\r\n    [{column.ColumnName}] {column.TypeDescriptor}";
-        }
-
-        private string GeneratePrimaryKeySql(PrimaryKeyMigration primaryKey)
-        {
-            string columnNames = string.Join(", ", primaryKey.Columns.Select(c => $"[{c.ColumnName}]").ToArray());
-
-            return $"\r\n    CONSTRAINT [PK_{TableName}] PRIMARY KEY CLUSTERED ({columnNames})";
         }
 
         protected override BigInteger ComputeSha256Hash()

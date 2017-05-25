@@ -17,8 +17,10 @@ namespace MergableMigrations.Specification.Implementation
                     return CreateTableMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateColumnMigration):
                     return CreateColumnMigration.FromMemento(memento, migrationsByHashCode);
-                case nameof(PrimaryKeyMigration):
-                    return PrimaryKeyMigration.FromMemento(memento, migrationsByHashCode);
+                case nameof(CreatePrimaryKeyMigration):
+                    return CreatePrimaryKeyMigration.FromMemento(memento, migrationsByHashCode);
+                case nameof(CreateUniqueIndexMigration):
+                    return CreateUniqueIndexMigration.FromMemento(memento, migrationsByHashCode);
                 default:
                     throw new ArgumentException($"Unknown type {memento.Type}");
             }
