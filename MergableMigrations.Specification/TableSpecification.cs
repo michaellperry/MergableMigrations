@@ -14,6 +14,16 @@ namespace MergableMigrations.Specification
             _migrationHistoryBuilder = migrationHistoryBuilder;
         }
 
+        public ColumnSpecification CreateIdentityColumn(string columnName)
+        {
+            var childMigration = new CreateColumnMigration(
+                _migration,
+                columnName, "INT IDENTITY (1,1) NOT NULL");
+            _migration.AddDefinition(childMigration);
+            _migrationHistoryBuilder.Append(childMigration);
+            return new ColumnSpecification(childMigration);
+        }
+
         public ColumnSpecification CreateIntColumn(string columnName, bool nullable = false)
         {
             var childMigration = new CreateColumnMigration(

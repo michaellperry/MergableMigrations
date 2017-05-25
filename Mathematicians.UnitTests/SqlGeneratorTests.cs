@@ -15,15 +15,14 @@ namespace Mathematicians.UnitTests
             var migrations = new Migrations();
             var migrationHistory = new MigrationHistory();
             var sql = WhenGenerateSql(migrations, migrationHistory);
-
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
-    [MathematicianId] INT NOT NULL,
+    [MathematicianId] INT IDENTITY (1,1) NOT NULL,
     CONSTRAINT [PK_Mathematician] PRIMARY KEY CLUSTERED ([MathematicianId]),
     [Name] NVARCHAR(100) NOT NULL,
     [BirthYear] INT NOT NULL,
     [DeathYear] INT NULL)");
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Contribution](
-    [ContributionId] INT NOT NULL,
+    [ContributionId] INT IDENTITY (1,1) NOT NULL,
     CONSTRAINT [PK_Contribution] PRIMARY KEY CLUSTERED ([ContributionId]),
     [MathematicianId] INT NOT NULL,
     [Description] NVARCHAR(500) NOT NULL,
@@ -63,7 +62,7 @@ namespace Mathematicians.UnitTests
             var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
 
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Field](
-    [FieldId] INT NOT NULL,
+    [FieldId] INT IDENTITY (1,1) NOT NULL,
     CONSTRAINT [PK_Field] PRIMARY KEY CLUSTERED ([FieldId]),
     [Name] NVARCHAR(20) NOT NULL)");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]

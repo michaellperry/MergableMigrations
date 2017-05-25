@@ -22,7 +22,7 @@ namespace Mathematicians
         {
             var table = schema.CreateTable("Mathematician");
 
-            var mathematicianId = table.CreateIntColumn("MathematicianId");
+            var mathematicianId = table.CreateIdentityColumn("MathematicianId");
             var pk = table.CreatePrimaryKey(mathematicianId);
             var name = table.CreateStringColumn("Name", 100);
             var birthYear = table.CreateIntColumn("BirthYear");
@@ -35,7 +35,7 @@ namespace Mathematicians
         {
             var table = schema.CreateTable("Field");
 
-            var id = table.CreateIntColumn("FieldId");
+            var id = table.CreateIdentityColumn("FieldId");
             var pk = table.CreatePrimaryKey(id);
             var name = table.CreateStringColumn("Name", 20);
 
@@ -46,7 +46,7 @@ namespace Mathematicians
         {
             var table = schema.CreateTable("Contribution");
 
-            var contributionId = table.CreateIntColumn("ContributionId");
+            var contributionId = table.CreateIdentityColumn("ContributionId");
             var pk = table.CreatePrimaryKey(contributionId);
             var mathematicianId = table.CreateIntColumn("MathematicianId");
             var description = table.CreateStringColumn("Description", 500);
