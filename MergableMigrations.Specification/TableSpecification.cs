@@ -57,6 +57,11 @@ namespace MergableMigrations.Specification
 
         public IndexSpecification CreateIndex(params ColumnSpecification[] columns)
         {
+            var childMigration = new CreateIndexMigration(
+                _migration,
+                columns.Select(c => c.Migration));
+            _migration.AddDefinition(childMigration);
+            _migrationHistoryBuilder.Append(childMigration);
             return new IndexSpecification();
         }
     }
