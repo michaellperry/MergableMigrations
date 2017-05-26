@@ -18,6 +18,7 @@ namespace MergableMigrations.Specification
         {
             var migration = new CreateTableMigration(_migration, tableName);
             _migrationHistoryBuilder.Append(migration);
+            migration.AddToPrerequisites();
             return new TableSpecification(migration, _migrationHistoryBuilder);
         }
     }

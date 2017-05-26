@@ -100,6 +100,13 @@ namespace Mathematicians.UnitTests
             sql.Should().Contain(@"DROP TABLE [Mathematicians].[dbo].[Field]");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
     DROP COLUMN [FieldId]");
+            sql.Should().NotContain(@"ALTER TABLE [Mathematicians].[dbo].[Field]
+    DROP COLUMN [Name]");
+
+            int dropColumn = Array.IndexOf(sql, @"ALTER TABLE [Mathematicians].[dbo].[Contribution]
+    DROP COLUMN [FieldId]");
+            int dropTable = Array.IndexOf(sql, @"DROP TABLE [Mathematicians].[dbo].[Field]");
+            dropColumn.Should().BeLessThan(dropTable);
         }
 
         private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)

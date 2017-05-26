@@ -58,10 +58,11 @@ namespace MergableMigrations.EF6
             {
                 var migrationsAffected = new MigrationHistoryBuilder();
                 migrationsAffected.Append(ahead.Head);
-                string[] result = ahead.Head.GenerateRollbackSql(migrationsAffected);
-                sql = sql.AddRange(result);
+                string[] rollbackSql = ahead.Head.GenerateRollbackSql(migrationsAffected);
                 var mementos = migrationsAffected.MigrationHistory.GetMementos().ToList();
-                sql = sql.AddRange(GenerateDeleteStatements(databaseName, mementos));
+                string[] deleteStatements = GenerateDeleteStatements(databaseName, mementos);
+                sql = sql.InsertRange(0, deleteStatements);
+                sql = sql.InsertRange(0, rollbackSql);
                 ahead = ahead.Subtract(migrationsAffected.MigrationHistory);
             }
 

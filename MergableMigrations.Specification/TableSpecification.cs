@@ -19,8 +19,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, "INT IDENTITY (1,1) NOT NULL");
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new ColumnSpecification(childMigration);
         }
 
@@ -29,8 +29,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, $"INT {(nullable ? "NULL" : "NOT NULL")}");
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new ColumnSpecification(childMigration);
         }
 
@@ -39,8 +39,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, $"NVARCHAR({length}) {(nullable ? "NULL" : "NOT NULL")}");
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new ColumnSpecification(childMigration);
         }
 
@@ -49,8 +49,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreatePrimaryKeyMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new PrimaryKeySpecification(childMigration, _migrationHistoryBuilder);
         }
 
@@ -59,8 +59,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateUniqueIndexMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new UniqueIndexSpecification(childMigration, _migrationHistoryBuilder);
         }
 
@@ -69,8 +69,8 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateIndexMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migration.AddDefinition(childMigration);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new IndexSpecification(childMigration, _migrationHistoryBuilder);
         }
     }

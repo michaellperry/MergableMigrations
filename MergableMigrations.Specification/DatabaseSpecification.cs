@@ -18,6 +18,7 @@ namespace MergableMigrations.Specification
         {
             var migration = new UseSchemaMigration(_databaseName, schemaName);
             _migrationHistoryBuilder.Append(migration);
+            migration.AddToPrerequisites();
             return new SchemaSpecification(migration, _migrationHistoryBuilder);
         }
     }

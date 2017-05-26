@@ -15,16 +15,12 @@ namespace MergableMigrations.Specification.Implementation
         public override string SchemaName => _parent.SchemaName;
         public override string TableName => _parent.TableName;
         public override IEnumerable<CreateColumnMigration> Columns => _columns;
+        internal override CreateTableMigration CreateTableMigration => _parent;
 
         public CreateIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
-        }
-
-        internal void AddDefinition(CreateForeignKeyMigration childMigration)
-        {
-            _parent.AddDefinition(childMigration);
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)

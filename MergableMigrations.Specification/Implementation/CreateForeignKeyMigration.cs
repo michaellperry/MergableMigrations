@@ -17,6 +17,7 @@ namespace MergableMigrations.Specification.Implementation
         public string SchemaName => _parent.SchemaName;
         public string TableName => _parent.TableName;
         public IEnumerable<CreateColumnMigration> Columns => _parent.Columns;
+        internal override CreateTableMigration CreateTableMigration => _parent.CreateTableMigration;
 
         public CreateForeignKeyMigration(IndexMigration parent, CreatePrimaryKeyMigration referencing, bool cascadeDelete, bool cascadeUpdate)
         {

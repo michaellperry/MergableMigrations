@@ -18,6 +18,7 @@ namespace MergableMigrations.Specification
         public string TableName => _parent.TableName;
         public string ColumnName => _columnName;
         public string TypeDescriptor => _typeDescriptor;
+        internal override CreateTableMigration CreateTableMigration => _parent;
 
         public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor)
         {

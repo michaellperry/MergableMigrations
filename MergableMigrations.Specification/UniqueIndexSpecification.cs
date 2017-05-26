@@ -23,6 +23,7 @@ namespace MergableMigrations.Specification
                 cascadeDelete,
                 cascadeUpdate);
             _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
             return new ForeignKeySpecification();
         }
     }

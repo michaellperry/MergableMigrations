@@ -13,8 +13,13 @@ namespace MergableMigrations.Specification.Implementation
         }
 
         public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected);
+        public abstract string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected);
         internal abstract MigrationMemento GetMemento();
         protected abstract BigInteger ComputeSha256Hash();
+
+        internal virtual void AddToPrerequisites()
+        {
+        }
 
         internal BigInteger Sha256Hash => _sha256Hash.Value;
 
@@ -38,7 +43,5 @@ namespace MergableMigrations.Specification.Implementation
         {
             return BitConverter.ToInt32(Sha256Hash.ToByteArray(), 0);
         }
-
-        public abstract string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected);
     }
 }
