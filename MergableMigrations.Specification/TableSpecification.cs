@@ -1,5 +1,6 @@
 ﻿using MergableMigrations.Specification.Implementation;
 using System.Linq;
+using System;
 
 namespace MergableMigrations.Specification
 {
@@ -39,6 +40,16 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateColumnMigration(
                 _migration,
                 columnName, $"NVARCHAR({length}) {(nullable ? "NULL" : "NOT NULL")}");
+            _migrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToPrerequisites();
+            return new ColumnSpecification(childMigration);
+        }
+
+        public ColumnSpecification CreateGuidColumn(string columnName, bool nullable = false)
+        {
+            var childMigration = new CreateColumnMigration(
+                _migration,
+                columnName, $"UNIQUEIDENTIFIER {(nullable ? "NULL" : "NOT NULL")}");
             _migrationHistoryBuilder.Append(childMigration);
             childMigration.AddToPrerequisites();
             return new ColumnSpecification(childMigration);

@@ -22,7 +22,7 @@ namespace Mathematicians.Web.App_Start
                 fileName,
                 master.ConnectionString,
                 new Migrations());
-            migrator.DestroyDatabase();
+            migrator.RollbackDatabase();
             migrator.MigrateDatabase();
         }
     }

@@ -61,6 +61,15 @@ namespace MergableMigrations.EF6
             ExecuteSqlCommands(sql);
         }
 
+        public void RollbackDatabase()
+        {
+            var migrationHistory = LoadMigrationHistory();
+            var generator = new SqlGenerator(_migrations, migrationHistory);
+            var sql = generator.GenerateRollbackSql(_databaseName);
+
+            ExecuteSqlCommands(sql);
+        }
+
         public void DestroyDatabase()
         {
             var fileNames = ExecuteSqlQuery($@"
