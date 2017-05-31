@@ -18,139 +18,140 @@ namespace MergableMigrations.Specification
 
         public ColumnSpecification CreateIdentityColumn(string columnName)
         {
-            return CreateColumn(columnName, "INT IDENTITY (1,1)", false);
+            return CreateColumn(columnName, "INT IDENTITY (1,1)", false, null);
         }
 
         public ColumnSpecification CreateBigIntColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "BIGINT", nullable);
+            return CreateColumn(columnName, "BIGINT", nullable, "0");
         }
 
         public ColumnSpecification CreateIntColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "INT", nullable);
+            return CreateColumn(columnName, "INT", nullable, "0");
         }
 
         public ColumnSpecification CreateSmallIntColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "SMALLINT", nullable);
+            return CreateColumn(columnName, "SMALLINT", nullable, "0");
         }
 
         public ColumnSpecification CreateTinyIntColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "TINYINT", nullable);
+            return CreateColumn(columnName, "TINYINT", nullable, "0");
         }
 
         public ColumnSpecification CreateBitColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "BIT", nullable);
+            return CreateColumn(columnName, "BIT", nullable, "0");
         }
 
         public ColumnSpecification CreateMoneyColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "MONEY", nullable);
+            return CreateColumn(columnName, "MONEY", nullable, "0");
         }
 
         public ColumnSpecification CreateSmallMoneyColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "SMALLMONEY", nullable);
+            return CreateColumn(columnName, "SMALLMONEY", nullable, "0");
         }
 
         public ColumnSpecification CreateDecimalColumn(string columnName, int precision = 18, int scale = 0, bool nullable = false)
         {
-            return CreateColumn(columnName, $"DECIMAL({precision},{scale})", nullable);
+            return CreateColumn(columnName, $"DECIMAL({precision},{scale})", nullable, "0");
         }
 
         public ColumnSpecification CreateFloatColumn(string columnName, int mantissa = 57, bool nullable = false)
         {
-            return CreateColumn(columnName, $"FLOAT({mantissa})", nullable);
+            return CreateColumn(columnName, $"FLOAT({mantissa})", nullable, "0");
         }
 
         public ColumnSpecification CreateRealColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "REAL", nullable);
+            return CreateColumn(columnName, "REAL", nullable, "0");
         }
 
         public ColumnSpecification CreateDateColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "DATE", nullable);
+            return CreateColumn(columnName, "DATE", nullable, "GETUTCDATE()");
         }
 
         public ColumnSpecification CreateDateTimeColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "DATETIME", nullable);
+            return CreateColumn(columnName, "DATETIME", nullable, "GETUTCDATE()");
         }
 
         public ColumnSpecification CreateSmallDateTimeColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "SMALLDATETIME", nullable);
+            return CreateColumn(columnName, "SMALLDATETIME", nullable, "GETUTCDATE()");
         }
 
         public ColumnSpecification CreateDateTime2Column(string columnName, int fractionalSeconds = 7, bool nullable = false)
         {
-            return CreateColumn(columnName, $"DATETIME2({fractionalSeconds})", nullable);
+            return CreateColumn(columnName, $"DATETIME2({fractionalSeconds})", nullable, "GETUTCDATE()");
         }
 
         public ColumnSpecification CreateTimeColumn(string columnName, int fractionalSeconds = 7, bool nullable = false)
         {
-            return CreateColumn(columnName, $"TIME({fractionalSeconds})", nullable);
+            return CreateColumn(columnName, $"TIME({fractionalSeconds})", nullable, "CONVERT (TIME, GETUTCDATE())");
         }
 
         public ColumnSpecification CreateDateTimeOffsetColumn(string columnName, int fractionalSeconds = 7, bool nullable = false)
         {
-            return CreateColumn(columnName, $"DATETIMEOFFSET({fractionalSeconds})", nullable);
+            return CreateColumn(columnName, $"DATETIMEOFFSET({fractionalSeconds})", nullable, "SYSDATETIMEOFFSET()");
         }
 
         public ColumnSpecification CreateStringColumn(string columnName, int length, bool nullable = false)
         {
-            return CreateColumn(columnName, $"NVARCHAR({length})", nullable);
+            return CreateColumn(columnName, $"NVARCHAR({length})", nullable, "N''");
         }
 
         public ColumnSpecification CreateFixedStringColumn(string columnName, int length, bool nullable = false)
         {
-            return CreateColumn(columnName, $"NCHAR({length})", nullable);
+            return CreateColumn(columnName, $"NCHAR({length})", nullable, "N''");
         }
 
         public ColumnSpecification CreateTextColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "NTEXT", nullable);
+            return CreateColumn(columnName, "NTEXT", nullable, "N''");
         }
 
         public ColumnSpecification CreateStringMaxColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "NVARCHAR(MAX)", nullable);
+            return CreateColumn(columnName, "NVARCHAR(MAX)", nullable, "N''");
         }
 
         public ColumnSpecification CreateAsciiStringColumn(string columnName, int length, bool nullable = false)
         {
-            return CreateColumn(columnName, $"VARCHAR({length})", nullable);
+            return CreateColumn(columnName, $"VARCHAR({length})", nullable, "''");
         }
 
         public ColumnSpecification CreateFixedAsciiStringColumn(string columnName, int length, bool nullable = false)
         {
-            return CreateColumn(columnName, $"CHAR({length})", nullable);
+            return CreateColumn(columnName, $"CHAR({length})", nullable, "''");
         }
 
         public ColumnSpecification CreateAsciiTextColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "TEXT", nullable);
+            return CreateColumn(columnName, "TEXT", nullable, "''");
         }
 
         public ColumnSpecification CreateAsciiStringMaxColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "VARCHAR(MAX)", nullable);
+            return CreateColumn(columnName, "VARCHAR(MAX)", nullable, "''");
         }
 
         public ColumnSpecification CreateGuidColumn(string columnName, bool nullable = false)
         {
-            return CreateColumn(columnName, "UNIQUEIDENTIFIER", nullable);
+            return CreateColumn(columnName, "UNIQUEIDENTIFIER", nullable, "'00000000-0000-0000-0000-000000000000'");
         }
 
-        private ColumnSpecification CreateColumn(string columnName, string typeDescriptor, bool nullable)
+        private ColumnSpecification CreateColumn(string columnName, string typeDescriptor, bool nullable, string defaultExpression)
         {
             var childMigration = new CreateColumnMigration(
                 _migration,
-                columnName, $"{typeDescriptor} {(nullable ? "NULL" : "NOT NULL")}");
+                columnName, $"{typeDescriptor} {(nullable ? "NULL" : "NOT NULL")}",
+                nullable ? null : defaultExpression);
             _migrationHistoryBuilder.Append(childMigration);
             childMigration.AddToPrerequisites();
             return new ColumnSpecification(childMigration);

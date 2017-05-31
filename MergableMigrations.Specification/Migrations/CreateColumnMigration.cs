@@ -12,36 +12,57 @@ namespace MergableMigrations.Specification.Migrations
         private readonly CreateTableMigration _parent;
         private readonly string _columnName;
         private readonly string _typeDescriptor;
+        private readonly string _defaultExpression;
 
         public string DatabaseName => _parent.DatabaseName;
         public string SchemaName => _parent.SchemaName;
         public string TableName => _parent.TableName;
         public string ColumnName => _columnName;
         public string TypeDescriptor => _typeDescriptor;
+        public string DefaultExpression => _defaultExpression;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor)
+        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, string defaultExpression)
         {
             _parent = parent;
             _columnName = columnName;
             _typeDescriptor = typeDescriptor;
+            _defaultExpression = defaultExpression;
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string[] sql =
+            if (DefaultExpression == null)
             {
-                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    ADD [{ColumnName}] {TypeDescriptor}"
-            };
+                string[] sql =
+                {
+                    $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
+    ADD [{ColumnName}] {TypeDescriptor}"
+                };
 
-            return sql;
+                return sql;
+            }
+            else
+            {
+                string[] sql =
+                {
+                    $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
+    ADD [{ColumnName}] {TypeDescriptor}
+    CONSTRAINT [DF_{ColumnName}] DEFAULT ({DefaultExpression})",
+                    $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
+    DROP CONSTRAINT [DF_{ColumnName}]",
+                };
+
+                return sql;
+            }
         }
 
         public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
         {
             string[] sql =
             {
-                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    DROP COLUMN [{ColumnName}]"
+                $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
+    DROP COLUMN [{ColumnName}]"
             };
 
             return sql;
@@ -54,21 +75,36 @@ namespace MergableMigrations.Specification.Migrations
 
         protected override BigInteger ComputeSha256Hash()
         {
-            return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
-                _parent.Sha256Hash,
-                _columnName.Sha256Hash(),
-                _typeDescriptor.Sha256Hash());
+            if (_defaultExpression == null)
+            {
+                return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
+                    _parent.Sha256Hash,
+                    _columnName.Sha256Hash(),
+                    _typeDescriptor.Sha256Hash());
+            }
+            else
+            {
+                return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
+                    _parent.Sha256Hash,
+                    _columnName.Sha256Hash(),
+                    _typeDescriptor.Sha256Hash(),
+                    _defaultExpression.Sha256Hash());
+            }
         }
 
         internal override MigrationMemento GetMemento()
         {
+            Dictionary<string, string> attributes = new Dictionary<string, string>
+            {
+                [nameof(ColumnName)] = ColumnName,
+                [nameof(TypeDescriptor)] = TypeDescriptor
+            };
+            if (DefaultExpression != null)
+                attributes[nameof(DefaultExpression)] = DefaultExpression;
+
             return new MigrationMemento(
                 nameof(CreateColumnMigration),
-                new Dictionary<string, string>
-                {
-                    [nameof(ColumnName)] = ColumnName,
-                    [nameof(TypeDescriptor)] = TypeDescriptor
-                },
+                attributes,
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
@@ -78,10 +114,15 @@ namespace MergableMigrations.Specification.Migrations
 
         public static CreateColumnMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
+            string defaultExpression;
+            if (!memento.Attributes.TryGetValue("DefaultExpression", out defaultExpression))
+                defaultExpression = null;
+
             return new CreateColumnMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Attributes["ColumnName"],
-                memento.Attributes["TypeDescriptor"]);
+                memento.Attributes["TypeDescriptor"],
+                defaultExpression);
         }
     }
 }
