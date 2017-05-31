@@ -90,7 +90,7 @@ namespace MergableMigrations.EF6
             string attributes = JsonConvert.SerializeObject(migration.Attributes);
             string hex = $"0x{migration.HashCode.ToString("X")}";
             return $@"
-    ('{migration.Type}', {hex}, '{attributes}')";
+    ('{migration.Type}', {hex}, '{attributes.Replace("'", "''")}')";
         }
 
         private string GeneratePrerequisiteInsertStatements(string databaseName, IEnumerable<MigrationMemento> migrations)
