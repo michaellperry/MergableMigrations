@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MergableMigrations.Specification.Migrations;
+using System;
 using System.Collections.Immutable;
 using System.Numerics;
 

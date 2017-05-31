@@ -1,6 +1,6 @@
 ﻿using MergableMigrations.Specification.Implementation;
 
-namespace MergableMigrations.Specification
+namespace MergableMigrations.Specification.Migrations
 {
     abstract class TableDefinitionMigration : Migration
     {

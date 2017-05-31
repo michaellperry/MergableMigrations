@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using MergableMigrations.Specification.Implementation;
 
-namespace MergableMigrations.Specification.Implementation
+namespace MergableMigrations.Specification.Migrations
 {
     class UseSchemaMigration : Migration
     {

@@ -1,4 +1,6 @@
-﻿namespace MergableMigrations.Specification
+﻿using MergableMigrations.Specification.Migrations;
+
+namespace MergableMigrations.Specification
 {
     public class ColumnSpecification
     {

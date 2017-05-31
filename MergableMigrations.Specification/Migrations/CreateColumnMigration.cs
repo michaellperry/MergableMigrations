@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Linq;
 using System.Collections.Immutable;
 
-namespace MergableMigrations.Specification
+namespace MergableMigrations.Specification.Migrations
 {
     class CreateColumnMigration : TableDefinitionMigration
     {

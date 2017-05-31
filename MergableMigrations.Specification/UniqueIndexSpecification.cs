@@ -1,4 +1,5 @@
 ﻿using MergableMigrations.Specification.Implementation;
+using MergableMigrations.Specification.Migrations;
 
 namespace MergableMigrations.Specification
 {

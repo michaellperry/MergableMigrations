@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using MergableMigrations.Specification.Implementation;
 
-namespace MergableMigrations.Specification.Implementation
+namespace MergableMigrations.Specification.Migrations
 {
     class CreateForeignKeyMigration : TableDefinitionMigration
     {

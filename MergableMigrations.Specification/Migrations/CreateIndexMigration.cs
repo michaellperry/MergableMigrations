@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using MergableMigrations.Specification.Implementation;
 
-namespace MergableMigrations.Specification.Implementation
+namespace MergableMigrations.Specification.Migrations
 {
-    class CreatePrimaryKeyMigration : IndexMigration
+    class CreateIndexMigration : IndexMigration
     {
         private readonly CreateTableMigration _parent;
         private readonly ImmutableList<CreateColumnMigration> _columns;
@@ -17,7 +18,7 @@ namespace MergableMigrations.Specification.Implementation
         public override IEnumerable<CreateColumnMigration> Columns => _columns;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
+        public CreateIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
@@ -25,10 +26,11 @@ namespace MergableMigrations.Specification.Implementation
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string columnNames = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string columnList = string.Join(", ", Columns.Select(c => $"[{c.ColumnName}]").ToArray());
             string[] sql =
             {
-                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    ADD CONSTRAINT [PK_{TableName}] PRIMARY KEY CLUSTERED ({columnNames})"
+                $"CREATE NONCLUSTERED INDEX [IX_{TableName}_{indexTail}] ON [{DatabaseName}].[{SchemaName}].[{TableName}] ({columnList})"
             };
 
             return sql;
@@ -36,9 +38,10 @@ namespace MergableMigrations.Specification.Implementation
 
         public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
         {
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
             string[] sql =
             {
-                $"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]\r\n    DROP CONSTRAINT [PK_{TableName}]"
+                $"DROP INDEX [IX_{TableName}_{indexTail}]"
             };
 
             return sql;
@@ -46,14 +49,15 @@ namespace MergableMigrations.Specification.Implementation
 
         internal override string GenerateDefinitionSql()
         {
-            string columnNames = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+            string indexTail = string.Join("_", _columns.Select(c => $"{c.ColumnName}").ToArray());
+            string columnList = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
 
-            return $"\r\n    CONSTRAINT [PK_{TableName}] PRIMARY KEY CLUSTERED ({columnNames})";
+            return $"\r\n    INDEX [IX_{TableName}_{indexTail}] NONCLUSTERED ({columnList})";
         }
 
         protected override BigInteger ComputeSha256Hash()
         {
-            return nameof(CreatePrimaryKeyMigration).Sha256Hash().Concatenate(
+            return nameof(CreateIndexMigration).Sha256Hash().Concatenate(
                 Enumerable.Repeat(_parent.Sha256Hash, 1)
                     .Concat(_columns.Select(c => c.Sha256Hash))
                     .ToArray());
@@ -62,7 +66,7 @@ namespace MergableMigrations.Specification.Implementation
         internal override MigrationMemento GetMemento()
         {
             return new MigrationMemento(
-                nameof(CreatePrimaryKeyMigration),
+                nameof(CreateIndexMigration),
                 new Dictionary<string, string>
                 {
                 },
@@ -74,9 +78,9 @@ namespace MergableMigrations.Specification.Implementation
                 });
         }
 
-        public static CreatePrimaryKeyMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
+        public static CreateIndexMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
-            return new CreatePrimaryKeyMigration(
+            return new CreateIndexMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>());
         }
