@@ -41,7 +41,7 @@ namespace MergableMigrations.Specification.Migrations
             string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
             string[] sql =
             {
-                $"DROP INDEX [IX_{TableName}_{indexTail}]"
+                $"DROP INDEX [IX_{TableName}_{indexTail}] ON [{DatabaseName}].[{SchemaName}].[{TableName}]"
             };
 
             return sql;

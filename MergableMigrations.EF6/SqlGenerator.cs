@@ -123,9 +123,9 @@ WHERE m.HashCode = 0x{migrationHashCode.ToString("X")} AND p.HashCode = 0x{prere
             {
                 $@"DELETE p
 FROM [{databaseName}].[dbo].[__MergableMigrationHistory] m
-JOIN [{databaseName}].[dbo].[__MergableMigrationHistory] p
+JOIN [{databaseName}].[dbo].[__MergableMigrationHistoryPrerequisite] p
   ON p.MigrationId = m.MigrationId
-WHERE h.HashCode IN ({hashCodes})",
+WHERE m.HashCode IN ({hashCodes})",
                 $@"DELETE FROM [{databaseName}].[dbo].[__MergableMigrationHistory]
 WHERE HashCode IN ({hashCodes})"
             };

@@ -26,8 +26,8 @@ namespace MergableMigrations.Specification.Migrations
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string indexTail = string.Join("_", _columns.Select(c => $"{c.ColumnName}").ToArray());
-            string columnList = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string columnList = string.Join(", ", Columns.Select(c => $"[{c.ColumnName}]").ToArray());
             string[] sql =
             {
                 $"CREATE UNIQUE NONCLUSTERED INDEX [UX_{TableName}_{indexTail}] ON [{DatabaseName}].[{SchemaName}].[{TableName}] ({columnList})"
@@ -38,13 +38,19 @@ namespace MergableMigrations.Specification.Migrations
 
         public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
         {
-            throw new NotImplementedException();
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string[] sql =
+            {
+                $"DROP INDEX [UX_{TableName}_{indexTail}] ON [{DatabaseName}].[{SchemaName}].[{TableName}]"
+            };
+
+            return sql;
         }
 
         internal override string GenerateDefinitionSql()
         {
-            string indexTail = string.Join("_", _columns.Select(c => $"{c.ColumnName}").ToArray());
-            string columnList = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
+            string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
+            string columnList = string.Join(", ", Columns.Select(c => $"[{c.ColumnName}]").ToArray());
 
             return $"\r\n    INDEX [UX_{TableName}_{indexTail}] UNIQUE NONCLUSTERED ({columnList})";
         }
