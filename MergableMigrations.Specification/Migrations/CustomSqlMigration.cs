@@ -27,13 +27,13 @@ namespace MergableMigrations.Specification.Migrations
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            return new string[] { _up };
+            return new string[] { $"USE {DatabaseName}", _up };
         }
 
         public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
         {
             return
-                _down != null ? new string[] { _down } :
+                _down != null ? new string[] { $"USE {DatabaseName}", _down } :
                 new string[] { };
         }
 
