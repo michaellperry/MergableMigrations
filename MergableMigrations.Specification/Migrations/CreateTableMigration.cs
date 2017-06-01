@@ -93,7 +93,7 @@ namespace MergableMigrations.Specification.Migrations
             return new CreateTableMigration(
                 (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Attributes["TableName"],
-                memento.Attributes["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
+                memento.Prerequisites["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
         }
     }
 }

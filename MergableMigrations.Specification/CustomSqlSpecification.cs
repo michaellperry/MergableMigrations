@@ -1,17 +1,19 @@
 ﻿using MergableMigrations.Specification.Implementation;
+using MergableMigrations.Specification.Migrations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MergableMigrations.Specification
 {
     public class CustomSqlSpecification : Specification
     {
-        internal override IEnumerable<Migration> Migrations => Enumerable.Empty<Migration>();
+        private CustomSqlMigration _migration;
 
-        internal CustomSqlSpecification(MigrationHistoryBuilder migrationHistoryBuilder) :
+        internal override IEnumerable<Migration> Migrations => new[] { _migration };
+
+        internal CustomSqlSpecification(CustomSqlMigration migration, MigrationHistoryBuilder migrationHistoryBuilder) :
             base(migrationHistoryBuilder)
         {
-
+            _migration = migration;
         }
     }
 }

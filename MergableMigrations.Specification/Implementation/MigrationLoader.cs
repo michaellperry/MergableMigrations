@@ -25,6 +25,8 @@ namespace MergableMigrations.Specification.Implementation
                     return CreateIndexMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateForeignKeyMigration):
                     return CreateForeignKeyMigration.FromMemento(memento, migrationsByHashCode);
+                case nameof(CustomSqlMigration):
+                    return CustomSqlMigration.FromMemento(memento, migrationsByHashCode);
                 default:
                     throw new ArgumentException($"Unknown type {memento.Type}");
             }

@@ -1,52 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using MergableMigrations.Specification.Implementation;
-using System.Linq;
+﻿using MergableMigrations.Specification.Implementation;
 using System.Collections.Immutable;
+using System;
+using System.Numerics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MergableMigrations.Specification.Migrations
 {
-    class UseSchemaMigration : Migration
+    class CustomSqlMigration : Migration
     {
         private readonly string _databaseName;
-        private readonly string _schemaName;
+        private readonly string _up;
+        private readonly string _down;
 
         public string DatabaseName => _databaseName;
-        public string SchemaName => _schemaName;
+        public string Up => _up;
+        public string Down => _down;
 
-        public UseSchemaMigration(string databaseName, string schemaName, ImmutableList<Migration> prerequisites) :
+        public CustomSqlMigration(string databaseName, string up, string down, ImmutableList<Migration> prerequisites) :
             base(prerequisites)
         {
             _databaseName = databaseName;
-            _schemaName = schemaName;
+            _up = up;
+            _down = down;
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            string[] sql = { };
-            return sql;
+            return new string[] { _up };
         }
 
         public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
         {
-            throw new NotImplementedException();
+            return
+                _down != null ? new string[] { _down } :
+                new string[] { };
         }
 
         protected override BigInteger ComputeSha256Hash()
         {
-            return nameof(UseSchemaMigration).Sha256Hash().Concatenate(
-                _schemaName.Sha256Hash());
+            return nameof(CustomSqlMigration).Sha256Hash().Concatenate(
+                _up.Sha256Hash(),
+                _down.Sha256Hash());
         }
 
         internal override MigrationMemento GetMemento()
         {
             return new MigrationMemento(
-                nameof(UseSchemaMigration),
+                nameof(CustomSqlMigration),
                 new Dictionary<string, string>
                 {
                     [nameof(DatabaseName)] = DatabaseName,
-                    [nameof(SchemaName)] = SchemaName
+                    [nameof(Up)] = Up,
+                    [nameof(Down)] = Down
                 },
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
@@ -55,11 +61,12 @@ namespace MergableMigrations.Specification.Migrations
                 });
         }
 
-        public static UseSchemaMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
+        public static CustomSqlMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
-            return new UseSchemaMigration(
+            return new CustomSqlMigration(
                 memento.Attributes["DatabaseName"],
-                memento.Attributes["SchemaName"],
+                memento.Attributes["Up"],
+                memento.Attributes["Down"],
                 memento.Prerequisites["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
         }
     }

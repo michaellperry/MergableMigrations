@@ -42,7 +42,10 @@ namespace MergableMigrations.Specification
 
         public CustomSqlSpecification Execute(string up, string down = null)
         {
-            throw new NotImplementedException();
+            var migration = new CustomSqlMigration(_databaseName, up, down, Prerequisites);
+            MigrationHistoryBuilder.Append(migration);
+            migration.AddToParent();
+            return new CustomSqlSpecification(migration, MigrationHistoryBuilder);
         }
     }
 }

@@ -8,6 +8,9 @@ namespace MergableMigrations.Specification.Implementation
     {
         public static BigInteger Sha256Hash(this string str)
         {
+            if (str == null)
+                return BigInteger.Zero;
+
             var digest = new Sha256Digest();
             byte[] stringBytes = Encoding.UTF8.GetBytes(str);
             digest.BlockUpdate(stringBytes, 0, stringBytes.Length);
