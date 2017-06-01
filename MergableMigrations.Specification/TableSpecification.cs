@@ -19,9 +19,16 @@ namespace MergableMigrations.Specification
             _migration = migration;
         }
 
+        private TableSpecification(CreateTableMigration migration, MigrationHistoryBuilder migrationHistoryBuilder, ImmutableList<Migration> prerequisites) :
+            base(migrationHistoryBuilder, prerequisites)
+        {
+            _migration = migration;
+        }
+
         public TableSpecification After(params Specification[] specifications)
         {
-            throw new NotImplementedException();
+            return new TableSpecification(_migration, MigrationHistoryBuilder,
+                Prerequisites.AddRange(specifications.SelectMany(x => x.Migrations)));
         }
 
         public ColumnSpecification CreateIdentityColumn(string columnName)
