@@ -20,7 +20,8 @@ namespace MergableMigrations.Specification.Migrations
         public IEnumerable<CreateColumnMigration> Columns => _parent.Columns;
         internal override CreateTableMigration CreateTableMigration => _parent.CreateTableMigration;
 
-        public CreateForeignKeyMigration(IndexMigration parent, CreatePrimaryKeyMigration referencing, bool cascadeDelete, bool cascadeUpdate)
+        public CreateForeignKeyMigration(IndexMigration parent, CreatePrimaryKeyMigration referencing, bool cascadeDelete, bool cascadeUpdate, ImmutableList<Migration> prerequsites) :
+            base(prerequsites)
         {
             _parent = parent;
             _referencing = referencing;
@@ -91,8 +92,9 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash },
-                    ["Referencing"] = new BigInteger[] { _referencing.Sha256Hash }
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash),
+                    ["Parent"] = new[] { _parent.Sha256Hash },
+                    ["Referencing"] = new[] { _referencing.Sha256Hash }
                 });
         }
 
@@ -102,7 +104,8 @@ namespace MergableMigrations.Specification.Migrations
                 (CreateIndexMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 (CreatePrimaryKeyMigration)migrationsByHashCode[memento.Prerequisites["Referencing"].Single()],
                 memento.Attributes["CascadeDelete"] == "true",
-                memento.Attributes["CascaseUpdate"] == "true");
+                memento.Attributes["CascaseUpdate"] == "true",
+                memento.Prerequisites["Prerequisites"].Select(x => migrationsByHashCode[x]).ToImmutableList());
         }
     }
 }

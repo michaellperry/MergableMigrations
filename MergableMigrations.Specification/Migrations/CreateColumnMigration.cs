@@ -22,7 +22,8 @@ namespace MergableMigrations.Specification.Migrations
         public bool Nullable => _nullable;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, bool nullable)
+        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, bool nullable, ImmutableList<Migration> prerequsites) :
+            base(prerequsites)
         {
             _parent = parent;
             _columnName = columnName;
@@ -115,7 +116,8 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash),
+                    ["Parent"] = new[] { _parent.Sha256Hash }
                 });
         }
 
@@ -125,7 +127,8 @@ namespace MergableMigrations.Specification.Migrations
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Attributes["ColumnName"],
                 memento.Attributes["TypeDescriptor"],
-                memento.Attributes["Nullable"] == "true");
+                memento.Attributes["Nullable"] == "true",
+                memento.Prerequisites["Prerequisites"].Select(x => migrationsByHashCode[x]).ToImmutableList());
         }
     }
 }

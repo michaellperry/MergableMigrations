@@ -1,6 +1,7 @@
 ﻿using MergableMigrations.Specification.Implementation;
 using MergableMigrations.Specification.Migrations;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification
 {
@@ -23,7 +24,8 @@ namespace MergableMigrations.Specification
                 _migration,
                 referencing._migration,
                 cascadeDelete,
-                cascadeUpdate);
+                cascadeUpdate,
+                Prerequisites);
             MigrationHistoryBuilder.Append(childMigration);
             childMigration.AddToParent();
             return new ForeignKeySpecification(MigrationHistoryBuilder);

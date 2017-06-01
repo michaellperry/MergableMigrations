@@ -18,7 +18,8 @@ namespace MergableMigrations.Specification.Migrations
         public override IEnumerable<CreateColumnMigration> Columns => _columns;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreateUniqueIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
+        public CreateUniqueIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns, ImmutableList<Migration> prerequsites) :
+            base(ImmutableList<Migration>.Empty)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
@@ -73,7 +74,8 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash },
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash),
+                    ["Parent"] = new[] { _parent.Sha256Hash },
                     ["Columns"] = _columns.Select(c => c.Sha256Hash).ToArray()
                 });
         }
@@ -82,7 +84,8 @@ namespace MergableMigrations.Specification.Migrations
         {
             return new CreateUniqueIndexMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
-                memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>());
+                memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>(),
+                memento.Prerequisites["Prerequisites"].Select(x => migrationsByHashCode[x]).ToImmutableList());
         }
     }
 }

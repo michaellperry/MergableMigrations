@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using MergableMigrations.Specification.Implementation;
+using System.Linq;
+using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification.Migrations
 {
@@ -13,7 +15,8 @@ namespace MergableMigrations.Specification.Migrations
         public string DatabaseName => _databaseName;
         public string SchemaName => _schemaName;
 
-        public UseSchemaMigration(string databaseName, string schemaName)
+        public UseSchemaMigration(string databaseName, string schemaName) :
+            base(ImmutableList<Migration>.Empty)
         {
             _databaseName = databaseName;
             _schemaName = schemaName;
@@ -48,6 +51,7 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash)
                 });
         }
 

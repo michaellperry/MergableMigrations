@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Numerics;
 
 namespace MergableMigrations.Specification.Implementation
 {
     public abstract class Migration
     {
-        private Lazy<BigInteger> _sha256Hash;
+        private readonly Lazy<BigInteger> _sha256Hash;
+        private readonly ImmutableList<Migration> _prerequisites;
 
-        protected Migration()
+        protected ImmutableList<Migration> Prerequisites => _prerequisites;
+
+        protected Migration(ImmutableList<Migration> prerequisites)
         {
             _sha256Hash = new Lazy<BigInteger>(ComputeSha256Hash);
+            _prerequisites = prerequisites;
         }
 
         public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected);

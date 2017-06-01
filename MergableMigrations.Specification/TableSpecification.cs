@@ -3,6 +3,7 @@ using MergableMigrations.Specification.Migrations;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace MergableMigrations.Specification
 {
@@ -155,7 +156,12 @@ namespace MergableMigrations.Specification
 
         private ColumnSpecification CreateColumn(string columnName, string typeDescriptor, bool nullable)
         {
-            var childMigration = new CreateColumnMigration(_migration, columnName, typeDescriptor, nullable);
+            var childMigration = new CreateColumnMigration(
+                _migration,
+                columnName,
+                typeDescriptor,
+                nullable,
+                Prerequisites);
             MigrationHistoryBuilder.Append(childMigration);
             childMigration.AddToParent();
             return new ColumnSpecification(childMigration, MigrationHistoryBuilder);
@@ -175,7 +181,8 @@ namespace MergableMigrations.Specification
         {
             var childMigration = new CreateUniqueIndexMigration(
                 _migration,
-                columns.Select(c => c.Migration));
+                columns.Select(c => c.Migration),
+                Prerequisites);
             MigrationHistoryBuilder.Append(childMigration);
             childMigration.AddToParent();
             return new UniqueIndexSpecification(childMigration, MigrationHistoryBuilder);

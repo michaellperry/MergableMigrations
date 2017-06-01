@@ -19,7 +19,8 @@ namespace MergableMigrations.Specification.Migrations
         public string SchemaName => _parent.SchemaName;
         public string TableName => _tableName;
 
-        public CreateTableMigration(UseSchemaMigration parent, string tableName)
+        public CreateTableMigration(UseSchemaMigration parent, string tableName) :
+            base(ImmutableList<Migration>.Empty)
         {
             _parent = parent;
             _tableName = tableName;
@@ -82,7 +83,8 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash }
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash),
+                    ["Parent"] = new[] { _parent.Sha256Hash }
                 });
         }
 

@@ -18,7 +18,8 @@ namespace MergableMigrations.Specification.Migrations
         public override IEnumerable<CreateColumnMigration> Columns => _columns;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns)
+        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns) :
+            base(ImmutableList<Migration>.Empty)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
@@ -70,7 +71,8 @@ namespace MergableMigrations.Specification.Migrations
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
-                    ["Parent"] = new BigInteger[] { _parent.Sha256Hash },
+                    ["Prerequisites"] = Prerequisites.Select(x => x.Sha256Hash),
+                    ["Parent"] = new[] { _parent.Sha256Hash },
                     ["Columns"] = _columns.Select(c => c.Sha256Hash).ToArray()
                 });
         }
