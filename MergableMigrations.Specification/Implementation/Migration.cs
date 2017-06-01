@@ -17,7 +17,7 @@ namespace MergableMigrations.Specification.Implementation
         internal abstract MigrationMemento GetMemento();
         protected abstract BigInteger ComputeSha256Hash();
 
-        internal virtual void AddToPrerequisites()
+        internal virtual void AddToParent()
         {
         }
 

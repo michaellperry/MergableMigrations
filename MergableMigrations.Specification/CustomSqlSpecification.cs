@@ -4,13 +4,14 @@ using System.Linq;
 
 namespace MergableMigrations.Specification
 {
-    public class ForeignKeySpecification : Specification
+    public class CustomSqlSpecification : Specification
     {
         internal override IEnumerable<Migration> Migrations => Enumerable.Empty<Migration>();
 
-        internal ForeignKeySpecification(MigrationHistoryBuilder migrationHistoryBuilder) :
+        internal CustomSqlSpecification(MigrationHistoryBuilder migrationHistoryBuilder) :
             base(migrationHistoryBuilder)
         {
+
         }
     }
 }

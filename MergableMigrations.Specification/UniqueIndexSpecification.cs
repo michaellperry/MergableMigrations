@@ -1,19 +1,20 @@
 ﻿using MergableMigrations.Specification.Implementation;
 using MergableMigrations.Specification.Migrations;
+using System.Collections.Generic;
 
 namespace MergableMigrations.Specification
 {
-    public class UniqueIndexSpecification
+    public class UniqueIndexSpecification : Specification
     {
         private CreateUniqueIndexMigration _migration;
-        private MigrationHistoryBuilder _migrationHistoryBuilder;
 
         internal CreateUniqueIndexMigration Migration => _migration;
+        internal override IEnumerable<Migration> Migrations => new[] { _migration };
 
-        internal UniqueIndexSpecification(CreateUniqueIndexMigration migration, MigrationHistoryBuilder migrationHistoryBuilder)
+        internal UniqueIndexSpecification(CreateUniqueIndexMigration migration, MigrationHistoryBuilder migrationHistoryBuilder) :
+            base(migrationHistoryBuilder)
         {
             _migration = migration;
-            _migrationHistoryBuilder = migrationHistoryBuilder;
         }
 
         public ForeignKeySpecification CreateForeignKey(PrimaryKeySpecification referencing, bool cascadeDelete = false, bool cascadeUpdate = false)
@@ -23,9 +24,9 @@ namespace MergableMigrations.Specification
                 referencing.Migration,
                 cascadeDelete,
                 cascadeUpdate);
-            _migrationHistoryBuilder.Append(childMigration);
-            childMigration.AddToPrerequisites();
-            return new ForeignKeySpecification();
+            MigrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToParent();
+            return new ForeignKeySpecification(MigrationHistoryBuilder);
         }
     }
 }

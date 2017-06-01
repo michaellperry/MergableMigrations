@@ -2,18 +2,25 @@
 using MergableMigrations.Specification.Migrations;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace MergableMigrations.Specification
 {
-    public class TableSpecification
+    public class TableSpecification : Specification
     {
-        private readonly MigrationHistoryBuilder _migrationHistoryBuilder;
         private readonly CreateTableMigration _migration;
 
-        internal TableSpecification(CreateTableMigration migration, MigrationHistoryBuilder migrationHistoryBuilder)
+        internal override IEnumerable<Migration> Migrations => new[] { _migration };
+
+        internal TableSpecification(CreateTableMigration migration, MigrationHistoryBuilder migrationHistoryBuilder) :
+            base(migrationHistoryBuilder)
         {
             _migration = migration;
-            _migrationHistoryBuilder = migrationHistoryBuilder;
+        }
+
+        public TableSpecification After(params Specification[] specifications)
+        {
+            throw new NotImplementedException();
         }
 
         public ColumnSpecification CreateIdentityColumn(string columnName)
@@ -149,9 +156,9 @@ namespace MergableMigrations.Specification
         private ColumnSpecification CreateColumn(string columnName, string typeDescriptor, bool nullable)
         {
             var childMigration = new CreateColumnMigration(_migration, columnName, typeDescriptor, nullable);
-            _migrationHistoryBuilder.Append(childMigration);
-            childMigration.AddToPrerequisites();
-            return new ColumnSpecification(childMigration);
+            MigrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToParent();
+            return new ColumnSpecification(childMigration, MigrationHistoryBuilder);
         }
 
         public PrimaryKeySpecification CreatePrimaryKey(params ColumnSpecification[] columns)
@@ -159,9 +166,9 @@ namespace MergableMigrations.Specification
             var childMigration = new CreatePrimaryKeyMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migrationHistoryBuilder.Append(childMigration);
-            childMigration.AddToPrerequisites();
-            return new PrimaryKeySpecification(childMigration, _migrationHistoryBuilder);
+            MigrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToParent();
+            return new PrimaryKeySpecification(childMigration, MigrationHistoryBuilder);
         }
 
         public UniqueIndexSpecification CreateUniqueIndex(params ColumnSpecification[] columns)
@@ -169,9 +176,9 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateUniqueIndexMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migrationHistoryBuilder.Append(childMigration);
-            childMigration.AddToPrerequisites();
-            return new UniqueIndexSpecification(childMigration, _migrationHistoryBuilder);
+            MigrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToParent();
+            return new UniqueIndexSpecification(childMigration, MigrationHistoryBuilder);
         }
 
         public IndexSpecification CreateIndex(params ColumnSpecification[] columns)
@@ -179,9 +186,9 @@ namespace MergableMigrations.Specification
             var childMigration = new CreateIndexMigration(
                 _migration,
                 columns.Select(c => c.Migration));
-            _migrationHistoryBuilder.Append(childMigration);
-            childMigration.AddToPrerequisites();
-            return new IndexSpecification(childMigration, _migrationHistoryBuilder);
+            MigrationHistoryBuilder.Append(childMigration);
+            childMigration.AddToParent();
+            return new IndexSpecification(childMigration, MigrationHistoryBuilder);
         }
     }
 }

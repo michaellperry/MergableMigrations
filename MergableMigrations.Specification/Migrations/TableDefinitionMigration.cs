@@ -7,7 +7,7 @@ namespace MergableMigrations.Specification.Migrations
         internal abstract CreateTableMigration CreateTableMigration { get; }
         internal abstract string GenerateDefinitionSql();
 
-        internal override void AddToPrerequisites()
+        internal override void AddToParent()
         {
             CreateTableMigration.AddDefinition(this);
         }
