@@ -67,7 +67,8 @@ namespace Mathematicians.UnitTests
     CONSTRAINT [PK_Field] PRIMARY KEY CLUSTERED ([FieldId]),
     [Name] NVARCHAR(20) NOT NULL)");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
-    ADD [FieldId] INT NOT NULL");
+    ADD [FieldId] INT NOT NULL
+    CONSTRAINT [DF_Contribution_FieldId] DEFAULT (0)");
         }
 
         [Fact]

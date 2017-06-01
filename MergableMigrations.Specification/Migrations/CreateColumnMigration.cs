@@ -12,32 +12,50 @@ namespace MergableMigrations.Specification.Migrations
         private readonly CreateTableMigration _parent;
         private readonly string _columnName;
         private readonly string _typeDescriptor;
-        private readonly string _defaultExpression;
+        private readonly bool _nullable;
 
         public string DatabaseName => _parent.DatabaseName;
         public string SchemaName => _parent.SchemaName;
         public string TableName => _parent.TableName;
         public string ColumnName => _columnName;
         public string TypeDescriptor => _typeDescriptor;
-        public string DefaultExpression => _defaultExpression;
+        public bool Nullable => _nullable;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, string defaultExpression)
+        public CreateColumnMigration(CreateTableMigration parent, string columnName, string typeDescriptor, bool nullable)
         {
             _parent = parent;
             _columnName = columnName;
             _typeDescriptor = typeDescriptor;
-            _defaultExpression = defaultExpression;
+            _nullable = nullable;
         }
 
         public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
         {
-            if (DefaultExpression == null)
+            string[] identityTypes = { "INT IDENTITY" };
+            string[] numericTypes = { "BIGINT", "INT", "SMALLINT", "TINYINT", "MONEY", "SMALLMONEY", "DECIMAL", "FLOAT", "REAL" };
+            string[] dateTypes = { "DATETIME", "SMALLDATETIME", "DATETIME2", "TIME" };
+            string[] dateTimeOffsetTypes = { "DATETIMEOFFSET" };
+            string[] stringTypes = { "NVARCHAR", "NCHAR", "NTEXT" };
+            string[] asciiStringTypes = { "VARCHAR", "CHAR", "TEXT" };
+            string[] guidTypes = { "UNIQUEIDENTIFIER" };
+
+            string defaultExpression =
+                _nullable ? null :
+                identityTypes.Any(t => TypeDescriptor.StartsWith(t)) ? null :
+                numericTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "0" :
+                dateTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "GETUTCDATE()" :
+                dateTimeOffsetTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "SYSDATETIMEOFFSET()" :
+                stringTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "N''" :
+                asciiStringTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "''" :
+                guidTypes.Any(t => TypeDescriptor.StartsWith(t)) ? "'00000000-0000-0000-0000-000000000000'" :
+                null;
+            if (defaultExpression == null)
             {
                 string[] sql =
                 {
                     $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
-    ADD [{ColumnName}] {TypeDescriptor}"
+    ADD [{ColumnName}] {TypeDescriptor} {NullableClause}"
                 };
 
                 return sql;
@@ -47,10 +65,10 @@ namespace MergableMigrations.Specification.Migrations
                 string[] sql =
                 {
                     $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
-    ADD [{ColumnName}] {TypeDescriptor}
-    CONSTRAINT [DF_{ColumnName}] DEFAULT ({DefaultExpression})",
+    ADD [{ColumnName}] {TypeDescriptor} {NullableClause}
+    CONSTRAINT [DF_{TableName}_{ColumnName}] DEFAULT ({defaultExpression})",
                     $@"ALTER TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]
-    DROP CONSTRAINT [DF_{ColumnName}]",
+    DROP CONSTRAINT [DF_{TableName}_{ColumnName}]",
                 };
 
                 return sql;
@@ -70,41 +88,30 @@ namespace MergableMigrations.Specification.Migrations
 
         internal override string GenerateDefinitionSql()
         {
-            return $"\r\n    [{ColumnName}] {TypeDescriptor}";
+            return $"\r\n    [{ColumnName}] {TypeDescriptor} {NullableClause}";
         }
+
+        private string NullableClause => $"{(Nullable ? "NULL" : "NOT NULL")}";
 
         protected override BigInteger ComputeSha256Hash()
         {
-            if (_defaultExpression == null)
-            {
-                return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
-                    _parent.Sha256Hash,
-                    _columnName.Sha256Hash(),
-                    _typeDescriptor.Sha256Hash());
-            }
-            else
-            {
-                return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
-                    _parent.Sha256Hash,
-                    _columnName.Sha256Hash(),
-                    _typeDescriptor.Sha256Hash(),
-                    _defaultExpression.Sha256Hash());
-            }
+            return nameof(CreateColumnMigration).Sha256Hash().Concatenate(
+                _parent.Sha256Hash,
+                _columnName.Sha256Hash(),
+                _typeDescriptor.Sha256Hash(),
+                _nullable ? "true".Sha256Hash() : "false".Sha256Hash());
         }
 
         internal override MigrationMemento GetMemento()
         {
-            Dictionary<string, string> attributes = new Dictionary<string, string>
-            {
-                [nameof(ColumnName)] = ColumnName,
-                [nameof(TypeDescriptor)] = TypeDescriptor
-            };
-            if (DefaultExpression != null)
-                attributes[nameof(DefaultExpression)] = DefaultExpression;
-
             return new MigrationMemento(
                 nameof(CreateColumnMigration),
-                attributes,
+                new Dictionary<string, string>
+                {
+                    [nameof(ColumnName)] = ColumnName,
+                    [nameof(TypeDescriptor)] = TypeDescriptor,
+                    [nameof(Nullable)] = Nullable ? "true" : "false"
+                },
                 Sha256Hash,
                 new Dictionary<string, IEnumerable<BigInteger>>
                 {
@@ -114,15 +121,11 @@ namespace MergableMigrations.Specification.Migrations
 
         public static CreateColumnMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
-            string defaultExpression;
-            if (!memento.Attributes.TryGetValue("DefaultExpression", out defaultExpression))
-                defaultExpression = null;
-
             return new CreateColumnMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
                 memento.Attributes["ColumnName"],
                 memento.Attributes["TypeDescriptor"],
-                defaultExpression);
+                memento.Attributes["Nullable"] == "true");
         }
     }
 }
