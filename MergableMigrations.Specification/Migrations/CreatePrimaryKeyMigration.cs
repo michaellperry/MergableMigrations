@@ -18,8 +18,8 @@ namespace MergableMigrations.Specification.Migrations
         public override IEnumerable<CreateColumnMigration> Columns => _columns;
         internal override CreateTableMigration CreateTableMigration => _parent;
 
-        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns) :
-            base(ImmutableList<Migration>.Empty)
+        public CreatePrimaryKeyMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns, ImmutableList<Migration> prerequisites) :
+            base(prerequisites)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
@@ -81,7 +81,8 @@ namespace MergableMigrations.Specification.Migrations
         {
             return new CreatePrimaryKeyMigration(
                 (CreateTableMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
-                memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>());
+                memento.Prerequisites["Columns"].Select(p => migrationsByHashCode[p]).OfType<CreateColumnMigration>(),
+                memento.Prerequisites["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
         }
     }
 }

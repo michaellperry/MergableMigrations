@@ -171,7 +171,8 @@ namespace MergableMigrations.Specification
         {
             var childMigration = new CreatePrimaryKeyMigration(
                 _migration,
-                columns.Select(c => c.Migration));
+                columns.Select(c => c.Migration),
+                Prerequisites);
             MigrationHistoryBuilder.Append(childMigration);
             childMigration.AddToParent();
             return new PrimaryKeySpecification(childMigration, MigrationHistoryBuilder);
@@ -192,7 +193,8 @@ namespace MergableMigrations.Specification
         {
             var childMigration = new CreateIndexMigration(
                 _migration,
-                columns.Select(c => c.Migration));
+                columns.Select(c => c.Migration),
+                Prerequisites);
             MigrationHistoryBuilder.Append(childMigration);
             childMigration.AddToParent();
             return new IndexSpecification(childMigration, MigrationHistoryBuilder);

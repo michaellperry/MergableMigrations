@@ -34,7 +34,7 @@ namespace MergableMigrations.Specification
 
         public SchemaSpecification UseSchema(string schemaName)
         {
-            var migration = new UseSchemaMigration(_databaseName, schemaName);
+            var migration = new UseSchemaMigration(_databaseName, schemaName, Prerequisites);
             MigrationHistoryBuilder.Append(migration);
             migration.AddToParent();
             return new SchemaSpecification(migration, MigrationHistoryBuilder);

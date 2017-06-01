@@ -19,8 +19,8 @@ namespace MergableMigrations.Specification.Migrations
         public string SchemaName => _parent.SchemaName;
         public string TableName => _tableName;
 
-        public CreateTableMigration(UseSchemaMigration parent, string tableName) :
-            base(ImmutableList<Migration>.Empty)
+        public CreateTableMigration(UseSchemaMigration parent, string tableName, ImmutableList<Migration> prerequisites) :
+            base(prerequisites)
         {
             _parent = parent;
             _tableName = tableName;
@@ -92,7 +92,8 @@ namespace MergableMigrations.Specification.Migrations
         {
             return new CreateTableMigration(
                 (UseSchemaMigration)migrationsByHashCode[memento.Prerequisites["Parent"].Single()],
-                memento.Attributes["TableName"]);
+                memento.Attributes["TableName"],
+                memento.Attributes["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
         }
     }
 }

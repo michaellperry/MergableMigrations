@@ -12,7 +12,7 @@ namespace MergableMigrations.Specification.Implementation
             switch (memento.Type)
             {
                 case nameof(UseSchemaMigration):
-                    return UseSchemaMigration.FromMemento(memento);
+                    return UseSchemaMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateTableMigration):
                     return CreateTableMigration.FromMemento(memento, migrationsByHashCode);
                 case nameof(CreateColumnMigration):

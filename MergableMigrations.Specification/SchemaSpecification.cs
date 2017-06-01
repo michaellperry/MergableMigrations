@@ -19,7 +19,7 @@ namespace MergableMigrations.Specification
 
         public TableSpecification CreateTable(string tableName)
         {
-            var migration = new CreateTableMigration(_migration, tableName);
+            var migration = new CreateTableMigration(_migration, tableName, Prerequisites);
             MigrationHistoryBuilder.Append(migration);
             migration.AddToParent();
             return new TableSpecification(migration, MigrationHistoryBuilder);

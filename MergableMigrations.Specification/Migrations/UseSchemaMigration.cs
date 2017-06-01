@@ -15,8 +15,8 @@ namespace MergableMigrations.Specification.Migrations
         public string DatabaseName => _databaseName;
         public string SchemaName => _schemaName;
 
-        public UseSchemaMigration(string databaseName, string schemaName) :
-            base(ImmutableList<Migration>.Empty)
+        public UseSchemaMigration(string databaseName, string schemaName, ImmutableList<Migration> prerequisites) :
+            base(prerequisites)
         {
             _databaseName = databaseName;
             _schemaName = schemaName;
@@ -55,11 +55,12 @@ namespace MergableMigrations.Specification.Migrations
                 });
         }
 
-        public static UseSchemaMigration FromMemento(MigrationMemento memento)
+        public static UseSchemaMigration FromMemento(MigrationMemento memento, IImmutableDictionary<BigInteger, Migration> migrationsByHashCode)
         {
             return new UseSchemaMigration(
                 memento.Attributes["DatabaseName"],
-                memento.Attributes["SchemaName"]);
+                memento.Attributes["SchemaName"],
+                memento.Attributes["Prerequisites"].Select(p => migrationsByHashCode[p]).ToImmutableList());
         }
     }
 }

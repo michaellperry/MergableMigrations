@@ -19,7 +19,7 @@ namespace MergableMigrations.Specification.Migrations
         internal override CreateTableMigration CreateTableMigration => _parent;
 
         public CreateUniqueIndexMigration(CreateTableMigration parent, IEnumerable<CreateColumnMigration> columns, ImmutableList<Migration> prerequsites) :
-            base(ImmutableList<Migration>.Empty)
+            base(prerequsites)
         {
             _parent = parent;
             _columns = columns.ToImmutableList();
