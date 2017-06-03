@@ -25,7 +25,10 @@ namespace MergableMigrations.Specification.Migrations
             _columns = columns.ToImmutableList();
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites
+            .Concat(new[] { CreateTableMigration });
+
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string columnNames = string.Join(", ", _columns.Select(c => $"[{c.ColumnName}]").ToArray());
             string[] sql =
@@ -36,7 +39,7 @@ namespace MergableMigrations.Specification.Migrations
             return sql;
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string[] sql =
             {

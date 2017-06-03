@@ -22,13 +22,15 @@ namespace MergableMigrations.Specification.Migrations
             _schemaName = schemaName;
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites;
+
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string[] sql = { };
             return sql;
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             throw new NotImplementedException();
         }

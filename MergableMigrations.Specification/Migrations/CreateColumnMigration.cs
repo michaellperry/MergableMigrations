@@ -31,7 +31,10 @@ namespace MergableMigrations.Specification.Migrations
             _nullable = nullable;
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites
+            .Concat(new[] { CreateTableMigration });
+
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string[] identityTypes = { "INT IDENTITY" };
             string[] numericTypes = { "BIGINT", "INT", "SMALLINT", "TINYINT", "MONEY", "SMALLMONEY", "DECIMAL", "FLOAT", "REAL" };
@@ -76,7 +79,7 @@ namespace MergableMigrations.Specification.Migrations
             }
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string[] sql =
             {

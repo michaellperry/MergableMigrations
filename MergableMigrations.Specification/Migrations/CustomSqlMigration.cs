@@ -25,12 +25,14 @@ namespace MergableMigrations.Specification.Migrations
             _down = down;
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites;
+
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             return new string[] { $"USE {DatabaseName}", _up };
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             return
                 _down != null ? new string[] { $"USE {DatabaseName}", _down } :

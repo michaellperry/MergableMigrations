@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System;
 
 namespace MergableMigrations.EF6.Generator
 {
-    class RollbackGenerator
+    class RollbackGenerator : IGraphVisitor
     {
         private readonly string _databaseName;
 
@@ -26,12 +27,17 @@ namespace MergableMigrations.EF6.Generator
         {
             var migrationsAffected = new MigrationHistoryBuilder();
             migrationsAffected.Append(migration);
-            string[] rollbackSql = migration.GenerateRollbackSql(migrationsAffected);
+            string[] rollbackSql = migration.GenerateRollbackSql(migrationsAffected, this);
             var mementos = migrationsAffected.MigrationHistory.GetMementos().ToList();
             string[] deleteStatements = GenerateDeleteStatements(_databaseName, mementos);
             _sql = _sql.InsertRange(0, deleteStatements);
             _sql = _sql.InsertRange(0, rollbackSql);
             _ahead = _ahead.Subtract(migrationsAffected.MigrationHistory);
+        }
+
+        public ImmutableList<Migration> PullPrerequisitesForward(Migration migration, Migration origin, Func<Migration, bool> canOptimize)
+        {
+            throw new NotImplementedException();
         }
 
         private string[] GenerateDeleteStatements(string databaseName, IEnumerable<MigrationMemento> migrations)

@@ -26,18 +26,26 @@ namespace MergableMigrations.Specification.Migrations
             _tableName = tableName;
         }
 
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites
+            .Concat(new[] { _parent });
+
         internal void AddDefinition(TableDefinitionMigration childMigration)
         {
             _definitions = _definitions.Add(childMigration);
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string createTable;
             string head = $"CREATE TABLE [{DatabaseName}].[{SchemaName}].[{TableName}]";
-            if (_definitions.Any())
+            var optimizableMigrations = _definitions
+                .SelectMany(m => graph.PullPrerequisitesForward(m, this, CanOptimize))
+                .ToImmutableList();
+            if (optimizableMigrations.Any())
             {
-                var definitions = _definitions.Select(d => d.GenerateDefinitionSql());
+                var definitions = optimizableMigrations
+                    .OfType<TableDefinitionMigration>()
+                    .Select(d => d.GenerateDefinitionSql());
                 createTable = $"{head}({string.Join(",", definitions)})";
             }
             else
@@ -49,12 +57,28 @@ namespace MergableMigrations.Specification.Migrations
             {
                 createTable
             };
-            migrationsAffected.AppendAll(_definitions);
+            migrationsAffected.AppendAll(optimizableMigrations);
 
             return sql;
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        private bool CanOptimize(Migration migration)
+        {
+            if (migration is TableDefinitionMigration definition)
+            {
+                return definition.CreateTableMigration == this;
+            }
+            else if (migration is CustomSqlMigration)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string[] sql =
             {

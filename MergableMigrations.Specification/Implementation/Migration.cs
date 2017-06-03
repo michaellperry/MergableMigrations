@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -17,8 +18,9 @@ namespace MergableMigrations.Specification.Implementation
             _prerequisites = prerequisites;
         }
 
-        public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected);
-        public abstract string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected);
+        public abstract IEnumerable<Migration> AllPrerequisites { get; }
+        public abstract string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph);
+        public abstract string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph);
         internal abstract MigrationMemento GetMemento();
         protected abstract BigInteger ComputeSha256Hash();
 

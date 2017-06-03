@@ -29,7 +29,10 @@ namespace MergableMigrations.Specification.Migrations
             _cascadeUpdate = cascadeUpdate;
         }
 
-        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected)
+        public override IEnumerable<Migration> AllPrerequisites => Prerequisites
+            .Concat(new[] { CreateTableMigration });
+
+        public override string[] GenerateSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
             string columnList = string.Join(", ", Columns.Select(c => $"[{c.ColumnName}]").ToArray());
@@ -47,7 +50,7 @@ namespace MergableMigrations.Specification.Migrations
             return sql;
         }
 
-        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected)
+        public override string[] GenerateRollbackSql(MigrationHistoryBuilder migrationsAffected, IGraphVisitor graph)
         {
             string indexTail = string.Join("_", Columns.Select(c => $"{c.ColumnName}").ToArray());
 
