@@ -1,14 +1,14 @@
 ﻿using System;
-using MergableMigrations.DDD;
-using MergableMigrations.Specification;
+using Schemavolution.DDD;
+using Schemavolution.Specification;
 
 namespace Mathematicians
 {
     // You wouldn't actually do this, but to test upgrading to a new version,
     // I created a second migrations class.
-    public class MigrationsV2 : IMigrations
+    public class MigrationsV2 : IGenome
     {
-        public void AddMigrations(DatabaseSpecification db)
+        public void AddGenes(DatabaseSpecification db)
         {
             var dbo = db.UseSchema("dbo");
 

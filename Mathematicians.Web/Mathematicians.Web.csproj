@@ -262,17 +262,17 @@
       <Project>{67e4c5b2-cedf-4e72-a3b8-aae3ec39c356}</Project>
       <Name>Mathematicians</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MergableMigrations.DDD\MergableMigrations.DDD.csproj">
+    <ProjectReference Include="..\Schemavolution.DDD\Schemavolution.DDD.csproj">
       <Project>{fe9c23f8-b414-46ab-9ea2-8e8308157c93}</Project>
-      <Name>MergableMigrations.DDD</Name>
+      <Name>Schemavolution.DDD</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MergableMigrations.EF6\MergableMigrations.EF6.csproj">
+    <ProjectReference Include="..\Schemavolution.EF6\Schemavolution.EF6.csproj">
       <Project>{6f10ef50-1323-474b-8d8d-eb48f03e3a9c}</Project>
-      <Name>MergableMigrations.EF6</Name>
+      <Name>Schemavolution.EF6</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MergableMigrations.Specification\MergableMigrations.Specification.csproj">
+    <ProjectReference Include="..\Schemavolution.Specification\Schemavolution.Specification.csproj">
       <Project>{a7d7c6e3-aa73-4ff0-b303-1b828b2e3efb}</Project>
-      <Name>MergableMigrations.Specification</Name>
+      <Name>Schemavolution.Specification</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

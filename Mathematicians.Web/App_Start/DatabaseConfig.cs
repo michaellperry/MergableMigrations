@@ -1,4 +1,4 @@
-﻿using MergableMigrations.EF6;
+﻿using Schemavolution.EF6;
 using System.Data.SqlClient;
 using System.Web;
 
@@ -17,13 +17,13 @@ namespace Mathematicians.Web.App_Start
 
             string fileName = server.MapPath("~/App_Data/Mathematicians.mdf");
             string databaseName = "Mathematicians";
-            var migrator = new DatabaseMigrator(
+            var evolver = new DatabaseEvolver(
                 databaseName,
                 fileName,
                 master.ConnectionString,
-                new Migrations());
-            migrator.RollbackDatabase();
-            migrator.MigrateDatabase();
+                new Genome());
+            evolver.DevolveDatabase();
+            evolver.EvolveDatabase();
         }
     }
 }

@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Schemavolution.DDD\Schemavolution.DDD.csproj" />
     <ProjectReference Include="..\Schemavolution.Specification\Schemavolution.Specification.csproj" />
   </ItemGroup>
 

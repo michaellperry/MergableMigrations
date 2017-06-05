@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
-using MergableMigrations.EF6;
-using MergableMigrations.Specification;
-using MergableMigrations.Specification.Implementation;
+using Schemavolution.EF6;
+using Schemavolution.Specification;
+using Schemavolution.Specification.Implementation;
 using System;
 using System.Linq;
 using Xunit;
@@ -13,7 +13,7 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void CanGenerateSql()
         {
-            var migrations = new Migrations();
+            var migrations = new Genome();
             var migrationHistory = new MigrationHistory();
             var sql = WhenGenerateSql(migrations, migrationHistory);
             sql.Should().Contain(@"CREATE TABLE [Mathematicians].[dbo].[Mathematician](
@@ -35,7 +35,7 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void GeneratesNoSqlWhenUpToDate()
         {
-            var migrations = new Migrations();
+            var migrations = new Genome();
             var migrationHistory = GivenCompleteMigrationHistory(migrations);
             var sql = WhenGenerateSql(migrations, migrationHistory);
 
@@ -45,7 +45,7 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void CanSaveMigrationHistory()
         {
-            var mementos = GivenMigrationMementos(new Migrations());
+            var mementos = GivenMigrationMementos(new Genome());
 
             mementos[0].Type.Should().Be("UseSchemaMigration");
             mementos[0].Attributes["SchemaName"].Should().Be("dbo");
@@ -58,7 +58,7 @@ namespace Mathematicians.UnitTests
         [Fact]
         public void CanUpgradeToANewVersion()
         {
-            var previousVersion = GivenMigrationMementos(new Migrations());
+            var previousVersion = GivenMigrationMementos(new Genome());
             var migrationHistory = WhenLoadMigrationHistory(previousVersion);
             var sql = WhenGenerateSql(new MigrationsV2(), migrationHistory);
 
@@ -77,14 +77,14 @@ namespace Mathematicians.UnitTests
             var laterVersion = GivenMigrationMementos(new MigrationsV2());
             var migrationHistory = WhenLoadMigrationHistory(laterVersion);
 
-            Action generateSql = () => WhenGenerateSql(new Migrations(), migrationHistory);
+            Action generateSql = () => WhenGenerateSql(new Genome(), migrationHistory);
             generateSql.ShouldThrow<InvalidOperationException>();
         }
 
         [Fact]
         public void ThrowsWhenMovingSideways()
         {
-            var laterVersion = GivenMigrationMementos(new Migrations());
+            var laterVersion = GivenMigrationMementos(new Genome());
             var migrationHistory = WhenLoadMigrationHistory(laterVersion);
 
             Action generateSql = () => WhenGenerateSql(new MigrationsV3(), migrationHistory);
@@ -96,7 +96,7 @@ namespace Mathematicians.UnitTests
         {
             var previousVersion = GivenMigrationMementos(new MigrationsV2());
             var migrationHistory = WhenLoadMigrationHistory(previousVersion);
-            var sql = WhenGenerateRollbackSql(new Migrations(), migrationHistory);
+            var sql = WhenGenerateRollbackSql(new Genome(), migrationHistory);
 
             sql.Should().Contain(@"DROP TABLE [Mathematicians].[dbo].[Field]");
             sql.Should().Contain(@"ALTER TABLE [Mathematicians].[dbo].[Contribution]
@@ -110,16 +110,16 @@ namespace Mathematicians.UnitTests
             dropColumn.Should().BeLessThan(dropTable);
         }
 
-        private MigrationMemento[] GivenMigrationMementos(IMigrations migrations)
+        private MigrationMemento[] GivenMigrationMementos(IGenome migrations)
         {
             var migrationHistory = GivenCompleteMigrationHistory(migrations);
             return migrationHistory.GetMementos().ToArray();
         }
 
-        private MigrationHistory GivenCompleteMigrationHistory(IMigrations migrations)
+        private MigrationHistory GivenCompleteMigrationHistory(IGenome migrations)
         {
             var databaseSpecification = new DatabaseSpecification("Mathematicians");
-            migrations.AddMigrations(databaseSpecification);
+            migrations.AddGenes(databaseSpecification);
             return databaseSpecification.MigrationHistory;
         }
 
@@ -128,13 +128,13 @@ namespace Mathematicians.UnitTests
             return MigrationHistory.LoadMementos(mementos);
         }
 
-        private static string[] WhenGenerateSql(IMigrations migrations, MigrationHistory migrationHistory)
+        private static string[] WhenGenerateSql(IGenome migrations, MigrationHistory migrationHistory)
         {
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
             return sqlGenerator.Generate("Mathematicians");
         }
 
-        private static string[] WhenGenerateRollbackSql(IMigrations migrations, MigrationHistory migrationHistory)
+        private static string[] WhenGenerateRollbackSql(IGenome migrations, MigrationHistory migrationHistory)
         {
             var sqlGenerator = new SqlGenerator(migrations, migrationHistory);
             return sqlGenerator.GenerateRollbackSql("Mathematicians");
